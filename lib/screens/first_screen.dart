@@ -33,9 +33,11 @@ class _FirstScreenState extends State<FirstScreen> {
         children: pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         backgroundColor: Colors.white,
         currentIndex: selectedScreenIndex,
-        selectedItemColor: Colors.teal,
+        selectedItemColor: Color.fromRGBO(76, 193, 201, 1),
         unselectedItemColor: Colors.grey,
         onTap: setIndex,
         items: const [

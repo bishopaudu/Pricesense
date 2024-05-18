@@ -1,4 +1,4 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
 
@@ -6,6 +6,7 @@ class InternetStatus extends StatefulWidget {
   const InternetStatus({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _InternetStatusState createState() => _InternetStatusState();
 }
 
@@ -19,13 +20,13 @@ class _InternetStatusState extends State<InternetStatus> {
     _checkConnectivity();
     _subscription = Connectivity().onConnectivityChanged.listen((result) {
       setState(() {
-        _connectivityResult = result as ConnectivityResult;
+        _connectivityResult = result;
       });
-    }) as StreamSubscription<ConnectivityResult>;
+    });
   }
 
   Future<void> _checkConnectivity() async {
-    ConnectivityResult result = (await Connectivity().checkConnectivity()) as ConnectivityResult;
+    ConnectivityResult result = (await Connectivity().checkConnectivity());
     setState(() {
       _connectivityResult = result;
     });
@@ -41,21 +42,21 @@ class _InternetStatusState extends State<InternetStatus> {
   Widget build(BuildContext context) {
     String status;
     if (_connectivityResult == ConnectivityResult.mobile) {
-      status = "Connected to Mobile Network";
+      status = "Online Mode";
     } else if (_connectivityResult == ConnectivityResult.wifi) {
       status = "Connected to WiFi";
     } else {
-      status = "No Internet Connection";
+      status = "Offline Mode";
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.yellow.shade100,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade400,
-            offset: Offset(2, 2),
+            offset: const Offset(2, 2),
             blurRadius: 5,
           ),
         ],
@@ -68,13 +69,13 @@ class _InternetStatusState extends State<InternetStatus> {
               _connectivityResult == ConnectivityResult.none
                   ? Icons.signal_wifi_off
                   : Icons.signal_wifi_4_bar,
-              size: 50,
-              color: Colors.teal,
+              size: 20,
+              color: const Color.fromRGBO(76, 194, 201, 1),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               status,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ],
@@ -82,4 +83,4 @@ class _InternetStatusState extends State<InternetStatus> {
       ),
     );
   }
-}*/
+}

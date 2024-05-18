@@ -18,20 +18,20 @@ class TextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: TextField(
+        child: TextFormField(
           keyboardType:textInputType,
           controller: controller,
           obscureText: obsecureText,
           decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade300),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
             ),
-            focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade400)),
+            focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white)),
             fillColor: Colors.grey.shade100,
             filled: true,
             hintText: text,
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
             prefixIcon: Icon,
              contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
           ),

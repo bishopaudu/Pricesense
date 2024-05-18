@@ -1,5 +1,11 @@
+// ignore_for_file: depend_on_referenced_packages, use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:pricesense/components/internet_connect.dart';
 import 'package:pricesense/components/summary.dart';
 import 'package:pricesense/screens/agent_details.dart';
 import 'package:pricesense/screens/collection_screen.dart';
@@ -12,8 +18,48 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String locationState = "";
+  String locationCity = "Fetching Location...";
+
+  Future<void> getLocation() async {
+    if (await Permission.location.isGranted) {
+      fetchLocation();
+    } else {
+      var status = await Permission.location.request();
+      if (status.isGranted) {
+        fetchLocation();
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Permission not granted"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> fetchLocation() async {
+    Position postion = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> preciseLocation =
+        await placemarkFromCoordinates(postion.latitude, postion.longitude);
+    if (preciseLocation.isNotEmpty) {
+      Placemark placemark = preciseLocation.first;
+      locationState = placemark.administrativeArea?? "Error";
+      locationCity = placemark.locality ?? "Error"; 
+    }
+  }
+
+  // grid list
   final List<Widget> gridItems = [
-    Summary(),
+    const Summary(),
     Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -28,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      child:  Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
@@ -39,8 +85,8 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.teal.shade200,
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+        const  Text(
             'Commodities Data',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Colors.black87),
@@ -49,47 +95,54 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ),
     Container(
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade400,
-            offset: Offset(2, 2),
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
             blurRadius: 5,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Center(child: Text("Item 3")),
-    ),
-    Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade400,
-            offset: Offset(2, 2),
-            blurRadius: 5,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "30",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.teal.shade200,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Uploaded',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
         ],
       ),
-      child: const Center(child: Text("Item 4")),
     ),
-    // Add more grid items as needed
+
+   const InternetStatus()
   ];
 
   Future<void> _refreshGrid() async {
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      // Update the grid items or fetch new data here
-      gridItems.shuffle();
+    await Future.delayed(const Duration(seconds: 2),() => {
+      fetchLocation()
     });
+    
   }
 
   @override
   void initState() {
     super.initState();
+    getLocation();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
     ));
@@ -99,44 +152,47 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
+        title: const Text(
           "AGENT NAME",
-          style: TextStyle(color: Colors.teal),
+          style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1), fontWeight: FontWeight.w400),
         ),
         backgroundColor: Colors.white,
         elevation: 2,
         leading: IconButton(
           onPressed: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => AgentDetails()));
+                MaterialPageRoute(builder: (context) => const AgentDetails()));
           },
-          icon:  Icon(Icons.supervised_user_circle, size: 35, color: Colors.teal.shade200),
+          icon: Icon(Icons.supervised_user_circle,
+              size: 35, color: Colors.white),
         ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon:  Icon(Icons.notifications, size: 35, color: Colors.teal.shade200),
+            icon: Icon(Icons.notifications,
+                size: 35, color: Colors.white),
           ),
         ],
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.teal.shade200, Colors.white],
+              colors: [Color.fromRGBO(76, 194, 201, 1), Colors.white],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
         ),
-        systemOverlayStyle: SystemUiOverlayStyle.dark, // Ensure the status bar text is dark
+        systemOverlayStyle:
+            SystemUiOverlayStyle.dark, 
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.teal.shade200,
+        backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
         child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CollectionScreen()),
+            MaterialPageRoute(builder: (context) => CollectionScreen()),
           );
         },
       ),
@@ -144,13 +200,12 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            
             height: 100,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
+              color: const Color.fromRGBO(76, 193, 201, 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.3),
@@ -160,24 +215,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            child:  Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.place, color: Colors.teal.shade200),
-                    SizedBox(width: 8),
-                    Text(
-                      "UYO, AKWA IBOM STATE, NIGERIA",
-                      style: TextStyle(fontSize: 16, color: Colors.black87)
-                    ),
+                    const Icon(Icons.place, color:Colors.white),
+                    const SizedBox(width: 8),
+                    Text(locationCity,
+                        style: const TextStyle(fontSize: 16, color: Colors.white)),
+                        const SizedBox(width:3),
+                    Text(locationState,
+                        style: const TextStyle(fontSize: 16, color: Colors.white))
                   ],
                 ),
-                Row(
+                const Row(
                   children: [
-                    Text("AGENT ID: ",style: TextStyle(fontSize: 16, color: Colors.black87)),
-                    Text("74838939944",style: TextStyle(fontSize: 16, color: Colors.black87)),
+                    Text("AGENT ID: ",
+                        style: TextStyle(fontSize: 18, color: Colors.white)),
+                    Text("74838939944",
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
                   ],
                 )
               ],
@@ -203,11 +261,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+         
         ],
+        
       ),
+
     );
   }
 }
-
-
-

@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToLogin() async {
-    await Future.delayed(const Duration(seconds: 5)); // Changed to 5 seconds
+    await Future.delayed(const Duration(seconds: 5)); 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => Login()),
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.teal,
               ),
             ),
-            SizedBox(height: 20), // Adjusted spacing
+            SizedBox(height: 20), 
             CircularProgressIndicator(
               color: Colors.teal,
             ),

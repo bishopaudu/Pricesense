@@ -1,29 +1,3 @@
-/*import 'package:flutter/material.dart';
-
-class Summary extends StatelessWidget {
-  const Summary({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-            height: 20,
-            width: 20,
-            decoration: BoxDecoration(
-               color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(10), 
-             ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text("2"),
-                const SizedBox(height: 10,),
-                Text('DataCollected')
-              ],
-            ),
-          );
-  }
-}*/
-
 import 'package:flutter/material.dart';
 
 class Summary extends StatelessWidget {
@@ -45,7 +19,7 @@ class Summary extends StatelessWidget {
           ),
         ],
       ),
-      child: const Column(
+      child:  Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
@@ -53,7 +27,7 @@ class Summary extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.teal,
+              color: Colors.teal.shade200,
             ),
           ),
           SizedBox(height: 10),
