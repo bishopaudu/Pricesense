@@ -51,7 +51,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
                 const SizedBox(height: 5,),
                 Text(widget.subtitle,
                     style: const TextStyle(
-                        fontSize: 16, color: Color.fromRGBO(8, 8, 8, 1)))
+                        fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
               ],
             ),
             value: widget.value,

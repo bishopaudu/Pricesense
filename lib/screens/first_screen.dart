@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pricesense/screens/agent_details.dart';
 import 'package:pricesense/screens/history_screen.dart';
 import 'package:pricesense/screens/home_screen.dart';
-import 'package:pricesense/screens/settings_screen.dart';
+//import 'package:pricesense/screens/settings_screen.dart';
 
 class FirstScreen extends StatefulWidget {
-  FirstScreen({super.key});
+  const FirstScreen({super.key});
 
   @override
   State<FirstScreen> createState() => _FirstScreenState();
@@ -12,9 +13,9 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
   final pages = [
-    HomeScreen(),
+    const HomeScreen(),
     HistoryScreen(),
-    SettingScreen()
+    const AgentDetails()
   ];
 
   int selectedScreenIndex = 0;
@@ -37,7 +38,7 @@ class _FirstScreenState extends State<FirstScreen> {
         showUnselectedLabels: false,
         backgroundColor: Colors.white,
         currentIndex: selectedScreenIndex,
-        selectedItemColor: Color.fromRGBO(76, 193, 201, 1),
+        selectedItemColor: const Color.fromRGBO(76, 193, 201, 1),
         unselectedItemColor: Colors.grey,
         onTap: setIndex,
         items: const [
@@ -52,7 +53,7 @@ class _FirstScreenState extends State<FirstScreen> {
             backgroundColor: Colors.white,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.person),
             label: "Settings",
             backgroundColor: Colors.white,
           ),

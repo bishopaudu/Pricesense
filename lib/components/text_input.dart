@@ -5,13 +5,13 @@ class TextInput extends StatelessWidget {
       {super.key,
       required this.textInputType,
       required this.text,
-      required this.Icon,
+      required this.widget,
       required this.obsecureText,
       required this.controller});
   final bool obsecureText;
   final String text;
   final TextEditingController controller;
-  final Widget Icon;
+  final Widget widget;
   final TextInputType textInputType;
 
   @override
@@ -32,7 +32,7 @@ class TextInput extends StatelessWidget {
             filled: true,
             hintText: text,
             hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
-            prefixIcon: Icon,
+            prefixIcon: widget,
              contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
           ),
         ));

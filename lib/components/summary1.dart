@@ -15,7 +15,7 @@ class Summary extends StatelessWidget {
             color: Colors.grey.withOpacity(0.3),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -30,8 +30,8 @@ class Summary extends StatelessWidget {
               color: Colors.teal.shade200,
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'Data Collected',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Colors.black87),

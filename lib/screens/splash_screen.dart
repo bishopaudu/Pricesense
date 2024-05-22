@@ -38,12 +38,12 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: Color.fromRGBO(76, 194, 201, 1),
               ),
             ),
             SizedBox(height: 20), 
             CircularProgressIndicator(
-              color: Colors.teal,
+              color: Color.fromRGBO(76, 194, 201, 1)
             ),
           ],
         ),
