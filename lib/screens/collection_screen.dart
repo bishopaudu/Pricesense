@@ -1,12 +1,13 @@
-import 'dart:io';
+// ignore_for_file: non_constant_identifier_names
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/custom_dropdown.dart';
 import 'package:pricesense/components/food_dropdown.dart';
 import 'package:pricesense/components/text_input.dart';
 import 'package:pricesense/screens/collection_complete.dart';
-
+import 'package:pricesense/utils/sizes.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
@@ -19,22 +20,26 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool isCompleted = false;
+   Map<String, String> selectedFoodData = {};
 
   final TextEditingController priceInformantNameController =
       TextEditingController();
-  final TextEditingController foodNameController = TextEditingController();
-  final TextEditingController sizeLevelController = TextEditingController();
-  final TextEditingController priceLevelController = TextEditingController();
-  final TextEditingController modularSizeController = TextEditingController();
   final TextEditingController estimatePriceController = TextEditingController();
   final TextEditingController remarksController = TextEditingController();
+  final TextEditingController weightsController = TextEditingController();
 
   List<String> coordinatorsList = [
     'Udosen Emma',
     'Adebayo Femi',
     'Abubakar Gani'
   ];
-  List<String> market = ['Akpan Andem', 'Itam Market', 'Ariaria Market','Shoprite','Market Square'];
+  List<String> market = [
+    'Akpan Andem',
+    'Itam Market',
+    'Ariaria Market',
+    'Shoprite',
+    'Market Square'
+  ];
   List<String> distributionType = ['WholeSale', 'Retails'];
 
   String? coordinatorValue;
@@ -44,10 +49,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void dispose() {
     _pageController.dispose();
     priceInformantNameController.dispose();
-    foodNameController.dispose();
-    sizeLevelController.dispose();
-    priceLevelController.dispose();
-    modularSizeController.dispose();
     estimatePriceController.dispose();
     remarksController.dispose();
     super.dispose();
@@ -85,7 +86,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-     
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -93,12 +93,23 @@ class _CollectionScreenState extends State<CollectionScreen> {
           style:
               TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
         ),
-        actions: const [
-          Icon(
+        /* actions: [
+          PopupMenuButton(
+            onSelected: (value){
+              if (value == "item1") {
+                
+              }
+            },
+              itemBuilder: ((context) =>
+                  const [
+                    PopupMenuItem(
+                      value: "item1",
+                      child: Text("Reset Form"))])),
+          /* Icon(
             Icons.more_vert,
             color: Color.fromRGBO(76, 194, 201, 1),
-          )
-        ],
+          )*/
+        ],*/
       ),
       body: isCompleted
           ? const CollectionComplete()
@@ -136,8 +147,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     children: [
                       _buildPage1(),
                       _buildPage2(),
-                     // _buildPage3(),
-                      _buildPage4(),
+                      _buildPage3(),
                       _buildSummaryPage(),
                     ],
                   ),
@@ -166,8 +176,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
               text: "Price Informant Name",
               obsecureText: false,
               controller: priceInformantNameController,
-            
-              textInputType: TextInputType.name, widget: Icon(Icons.person, color: Colors.teal),
+              textInputType: TextInputType.name,
+              widget: const Icon(
+                Icons.person,
+                color: Color.fromRGBO(76, 194, 201, 1),
+                size: Sizes.iconSize,
+              ), onChanged: (value) {  },
             ),
             const SizedBox(height: 8),
             CustomDropdown(
@@ -200,75 +214,70 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget _buildPage2() {
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "Food Item",
-            style: TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
-          ),
-          const SizedBox(height: 10),
-         CustomDropdown(
-            dataList: distributionType,
-            value: distributionTypeValue,
-            maintitle: "Distribution Type",
-            subtitle: "Select Distribution Type",
-            onChanged: (value) {
-              setState(() {
-                distributionTypeValue = value;
-              });
-            },
-          ),
-          const SizedBox(height: 10,),
-          FoodDropdown()
-        ],
-      ),
-    ),
-  );
-}
-
-
-  Widget _buildPage3() {
-    Localizations.localeOf(context);
-    var format  = NumberFormat.simpleCurrency(locale:Platform.localeName,name:"NGN");
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "Distribution Type",
-            style:
-                TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
-          ),
-          const SizedBox(height: 16),
-          TextInput(
-            text: "Price Level",
-            obsecureText: false,
-            controller: priceLevelController,
-           
-            textInputType: TextInputType.number, widget:Text(format.currencySymbol),
-          ),
-          const SizedBox(height: 8),
-          TextInput(
-            text: "Modular Size",
-            obsecureText: false,
-            controller: modularSizeController,
-        
-            textInputType: TextInputType.text, widget: Icon(Icons.straighten, color: Colors.teal),
-          ),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Food Item",
+              style: TextStyle(
+                  fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
+            ),
+            const SizedBox(height: 10),
+            CustomDropdown(
+              dataList: distributionType,
+              value: distributionTypeValue,
+              maintitle: "Distribution Type",
+              subtitle: "Select Distribution Type",
+              onChanged: (value) {
+                setState(() {
+                  distributionTypeValue = value;
+                });
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+      FoodDropdown(
+              onFoodDataChanged: (Map<String, String> foodData) {
+                setState(() {
+                  selectedFoodData = foodData;
+                });
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              "Input Weight If Applicable",
+              style: TextStyle(fontSize: 16,color: Color.fromRGBO(76, 194, 201, 1)),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            TextInput(
+                text: "Weight in KG/G",
+                obsecureText: false,
+                controller: weightsController,
+                textInputType: TextInputType.number,
+                widget: const Icon(
+                  Icons.scale,
+                  color: Color.fromRGBO(76, 194, 201, 1),
+                  size: Sizes.iconSize,
+                ), onChanged: (value) { },),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPage4() {
-     Localizations.localeOf(context);
-    var format  = NumberFormat.simpleCurrency(locale:Platform.localeName,name:"NGN");
+  Widget _buildPage3() {
+    Localizations.localeOf(context);
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -284,25 +293,34 @@ class _CollectionScreenState extends State<CollectionScreen> {
             text: "Estimate Price",
             obsecureText: false,
             controller: estimatePriceController,
-            textInputType: TextInputType.number, 
-            widget:Padding(
+            textInputType: TextInputType.number,
+            widget: Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(format.currencySymbol,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                  Text(
+                    format.currencySymbol,
+                    style: const TextStyle(
+                        color: Color.fromRGBO(76, 194, 201, 1),
+                        fontSize: Sizes.iconSize,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
-            ),
+            ), onChanged: (value) {},
           ),
           const SizedBox(height: 8),
           TextInput(
-            text: "Remarks",
-            obsecureText: false,
-            controller: remarksController,
-            textInputType: TextInputType.text, 
-            widget: Icon(Icons.note, color: Colors.teal)
-          ),
+              text: "Remarks",
+              obsecureText: false,
+              controller: remarksController,
+              textInputType: TextInputType.text,
+              widget: const Icon(
+                Icons.edit_note,
+                color: Color.fromRGBO(76, 194, 201, 1),
+                size: Sizes.iconSize,
+              ), onChanged: (value) {  },),
         ],
       ),
     );
@@ -311,27 +329,31 @@ class _CollectionScreenState extends State<CollectionScreen> {
   Widget _buildSummaryPage() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "Summary",
-            style:
-                TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryItem(
-              "Price Informant Name:", priceInformantNameController.text),
-          _buildSummaryItem("Coordinator:", coordinatorValue ?? ""),
-          _buildSummaryItem("Market:", marketValue ?? ""),
-          _buildSummaryItem("Distribution Type:", distributionTypeValue ?? ""),
-          _buildSummaryItem("Food Name:", foodNameController.text),
-          _buildSummaryItem("Size Level:", sizeLevelController.text),
-          _buildSummaryItem("Price Level:", priceLevelController.text),
-          _buildSummaryItem("Modular Size:", modularSizeController.text),
-          _buildSummaryItem("Estimate Price:", estimatePriceController.text),
-          _buildSummaryItem("Remarks:", remarksController.text),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection:Axis.vertical,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Summary",
+              style:
+                  TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryItem(
+                "Price Informant Name:", priceInformantNameController.text),
+            _buildSummaryItem("Coordinator:", coordinatorValue ?? ""),
+            _buildSummaryItem("Market:", marketValue ?? ""),
+            _buildSummaryItem("Distribution Type:", distributionTypeValue ?? ""),
+              _buildSummaryItem("Food Item:", selectedFoodData['foodItem'] ?? ""),
+              _buildSummaryItem("Subtype:", selectedFoodData['subtype'] ?? ""),
+              _buildSummaryItem("Price:", selectedFoodData['price'] ?? ""),
+             _buildSummaryItem("Weights",weightsController.text),
+            _buildSummaryItem("Estimate Price:", estimatePriceController.text),
+            _buildSummaryItem("Remarks:", remarksController.text),
+            
+          ],
+        ),
       ),
     );
   }
@@ -366,7 +388,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color:const Color.fromRGBO(76, 194, 201, 1),
+                  color: const Color.fromRGBO(76, 194, 201, 1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: const Color.fromRGBO(76, 194, 201, 1),
@@ -380,7 +402,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                   ),
-                  child: const Text("Back",style:TextStyle(color: Colors.white)),
+                  child:
+                      const Text("Back", style: TextStyle(color: Colors.white)),
                 ),
               ),
             ),
@@ -389,7 +412,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color:const Color.fromRGBO(76, 194, 201, 1),
+                color: const Color.fromRGBO(76, 194, 201, 1),
                 border: Border.all(
                   color: const Color.fromRGBO(76, 194, 201, 1),
                   width: 1,
@@ -398,11 +421,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
               child: ElevatedButton(
                 onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(76, 194, 201, 1),
+                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
-                child: Text(isLastPage ? "Submit" : "Next",style:TextStyle(color: Colors.white)),
+                child: Text(isLastPage ? "Submit" : "Next",
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
           ),
@@ -411,3 +435,4 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }
 }
+

@@ -1,10 +1,11 @@
 // ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api
 
-import 'dart:io';
+/*import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/utils/sizes.dart';
 
 class FoodDropdown extends StatefulWidget {
   @override
@@ -38,7 +39,6 @@ class _FoodDropdown extends State<FoodDropdown> {
     ],
     'Tuber Of Yam': ['Water Yam', 'Dry Yam', 'White Guinea Yam'],
     'Garri': ['Brown', 'White'],
-    'Noodles':["Golden Penny",'Mimee',"Jolly","Supreme",'Honywell'],
     'Basket Of Cassava': null,
   };
 
@@ -52,7 +52,8 @@ class _FoodDropdown extends State<FoodDropdown> {
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
-    var format  = NumberFormat.simpleCurrency(locale:Platform.localeName,name:"NGN");
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,18 +114,24 @@ class _FoodDropdown extends State<FoodDropdown> {
         TextInput(
             textInputType: TextInputType.name,
             text: "Price",
-            widget:Padding(
+            widget: Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(format.currencySymbol,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                  Text(
+                    format.currencySymbol,
+                    style: const TextStyle(
+                        color: Color.fromRGBO(76, 194, 201, 1),
+                        fontSize: Sizes.iconSize,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
             obsecureText: false,
             controller: priceController),
-        const SizedBox(height: 20),
+        /* const SizedBox(height: 20),
         if (selectedFoodItem == 'Noodles' && customBrand == null)
           buildBrandDropdown(),
         if (selectedFoodItem == 'Noodles' && customBrand != null)
@@ -138,7 +145,7 @@ class _FoodDropdown extends State<FoodDropdown> {
             },
           ),
         const SizedBox(height: 20),
-        /* ElevatedButton(
+         ElevatedButton(
           onPressed: () {
             // Handle form submission
             print('Selected Food Item: $selectedFoodItem');
@@ -296,4 +303,215 @@ void main() {
   runApp(MaterialApp(
     home: FoodDropdown(),
   ));
+}*/
+
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/utils/sizes.dart';
+
+class FoodDropdown extends StatefulWidget {
+  final Function(Map<String, String>) onFoodDataChanged;
+
+  const FoodDropdown({required this.onFoodDataChanged});
+
+  @override
+  _FoodDropdownState createState() => _FoodDropdownState();
 }
+
+class _FoodDropdownState extends State<FoodDropdown> {
+  List<String> foodItems = [
+    'Bag OF Rice',
+    'Ball Pepper',
+    'Bag Of Beans',
+    'Tuber Of Yam',
+    'Noddles',
+    'Spaghetti',
+    'Crate Of Eggs',
+    'Garri',
+    'Noodles',
+  ];
+  final Map<String, List<String>?> foodSubTypes = {
+    'Bag OF Rice': ['Foreign', 'Imported'],
+    'Ball Pepper': ['Olutu', 'Plebe', 'White'],
+    'Bag Of Beans': [
+      'Rodo',
+      'Tatase',
+      'Sombo/Bawa',
+      'Bell/Sweet',
+      'Alligator',
+      'Black',
+      'White',
+      'Habanero'
+    ],
+    'Tuber Of Yam': ['Water Yam', 'Dry Yam', 'White Guinea Yam'],
+    'Garri': ['Brown', 'White'],
+    'Basket Of Cassava': null,
+  };
+
+  String? selectedFoodItem;
+  String? selectedSubtype;
+  String? customSubtype;
+  TextEditingController priceController = TextEditingController();
+
+  void _notifyParent() {
+    widget.onFoodDataChanged({
+      'foodItem': selectedFoodItem ?? '',
+      'subtype': selectedSubtype ?? customSubtype ?? '',
+      'price': priceController.text,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Localizations.localeOf(context);
+    var format = NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              hint: const Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Select FoodItems",
+                    style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                  ),
+                  SizedBox(height: 5),
+                  Text("Food Items",
+                      style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
+                ],
+              ),
+              isExpanded: true,
+              value: selectedFoodItem,
+              items: foodItems.map((String foodItem) {
+                return DropdownMenuItem<String>(
+                  value: foodItem,
+                  child: Text(foodItem),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedFoodItem = newValue;
+                  selectedSubtype = null;
+                  customSubtype = null;
+                });
+                _notifyParent();
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        if (selectedFoodItem != null) buildSubtypeOrBrandDropdown(),
+        const SizedBox(height: 20),
+        TextInput(
+          textInputType: TextInputType.number,
+          text: "Price",
+          widget: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  format.currencySymbol,
+                  style: const TextStyle(
+                      color: Color.fromRGBO(76, 194, 201, 1),
+                      fontSize: Sizes.iconSize,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          obsecureText: false,
+          controller: priceController,
+          onChanged: (value) => _notifyParent(),
+        ),
+      ],
+    );
+  }
+
+  Widget buildSubtypeOrBrandDropdown() {
+    if (foodSubTypes[selectedFoodItem] == null) {
+      return const SizedBox.shrink();
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                hint: const Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "SubType",
+                      style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    ),
+                    SizedBox(height: 5),
+                    Text("Select SubType",
+                        style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
+                  ],
+                ),
+                isExpanded: true,
+                value: selectedSubtype,
+                items: foodSubTypes[selectedFoodItem]!.map((String subtype) {
+                  return DropdownMenuItem<String>(
+                    value: subtype,
+                    child: Text(subtype),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedSubtype = newValue;
+                    customSubtype = null;
+                  });
+                  _notifyParent();
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (selectedSubtype == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white)),
+                  fillColor: Colors.grey.shade100,
+                  filled: true,
+                  hintText: "Custom SubType",
+                  hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+                ),
+                onChanged: (value) {
+                  customSubtype = value;
+                  _notifyParent();
+                },
+              ),
+            ),
+        ],
+      );
+    }
+  }
+}
+
+

@@ -1,9 +1,12 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pricesense/screens/collection_screen.dart';
+import 'package:pricesense/screens/home_screen.dart';
 
 class CollectionComplete extends StatefulWidget {
-  const CollectionComplete({Key? key}) : super(key: key);
+  const CollectionComplete({super.key});
 
   @override
   _CollectionCompleteState createState() => _CollectionCompleteState();
@@ -45,7 +48,14 @@ class _CollectionCompleteState extends State<CollectionComplete>
   void goBack() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CollectionScreen()),
+      MaterialPageRoute(builder: (context) => CollectionScreen()),
+    );
+  }
+
+  void goHome(){
+     Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -79,19 +89,39 @@ class _CollectionCompleteState extends State<CollectionComplete>
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: goBack,
-              style: ElevatedButton.styleFrom(
-                textStyle: const TextStyle(fontSize: 20),
-                minimumSize: const Size(150, 45), 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: goBack,
+                  style: ElevatedButton.styleFrom(
+                    textStyle: const TextStyle(fontSize: 20),
+                    minimumSize: const Size(150, 45), 
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  child: const Text("New Collection", style: TextStyle(color: Colors.white)),
                 ),
-                backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-              ),
-              child: const Text("Go Back", style: TextStyle(color: Colors.white)),
+                const SizedBox(width: 10,),
+                  ElevatedButton(
+                  onPressed: goHome,
+                  style: ElevatedButton.styleFrom(
+                    textStyle: const TextStyle(fontSize: 20),
+                    minimumSize: const Size(150, 45), 
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  child: const Text("Go Home", style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ],
         ),

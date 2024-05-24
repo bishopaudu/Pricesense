@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:pricesense/utils/sizes.dart';
 
 class CustomDropdown extends StatefulWidget {
   CustomDropdown(
@@ -56,7 +57,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
             ),
             value: widget.value,
             isExpanded: true,
-            iconSize: 20,
+            iconSize: Sizes.iconSize,
             icon: const Icon(
               Icons.arrow_drop_down,
               color: Colors.black,

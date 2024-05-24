@@ -7,7 +7,7 @@ class TextInput extends StatelessWidget {
       required this.text,
       required this.widget,
       required this.obsecureText,
-      required this.controller});
+      required this.controller, required void Function(dynamic value) onChanged});
   final bool obsecureText;
   final String text;
   final TextEditingController controller;
