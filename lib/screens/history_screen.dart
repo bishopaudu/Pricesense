@@ -93,6 +93,7 @@ class HistoryScreen extends StatelessWidget {
 }*/
 
 import 'package:flutter/material.dart';
+import 'package:pricesense/screens/details.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -204,18 +205,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text("History"),
         elevation: 0,
         backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
+       /* actions: [
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.more_vert_rounded),
           ),
-        ],
+        ],*/
       ),
       body: Column(
         children: [
@@ -272,6 +267,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   trailing: Text(item['date']!),
                   onTap: () {
                     // Handle item tap
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Details()));
                   },
                 );
               },

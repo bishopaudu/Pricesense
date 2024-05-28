@@ -322,20 +322,21 @@ class FoodDropdown extends StatefulWidget {
 
 class _FoodDropdownState extends State<FoodDropdown> {
   List<String> foodItems = [
-    'Bag OF Rice',
-    'Ball Pepper',
-    'Bag Of Beans',
+    'Bag of Rice',
+    'Plate of Pepper',
+    'Bag of Beans',
     'Tuber Of Yam',
     'Noddles',
-    'Spaghetti',
+    '500g Spaghetti',
     'Crate Of Eggs',
     'Garri',
     'Noodles',
+    'Kilo of Fish'
   ];
   final Map<String, List<String>?> foodSubTypes = {
-    'Bag OF Rice': ['Foreign', 'Imported'],
-    'Ball Pepper': ['Olutu', 'Plebe', 'White'],
-    'Bag Of Beans': [
+    'Bag of Rice': ['Foreign', 'Imported'],
+    'Bag of Beans': ['Olutu', 'Plebe', 'White', 'oloyin'],
+    'Plate of Pepper': [
       'Rodo',
       'Tatase',
       'Sombo/Bawa',
@@ -346,7 +347,18 @@ class _FoodDropdownState extends State<FoodDropdown> {
       'Habanero'
     ],
     'Tuber Of Yam': ['Water Yam', 'Dry Yam', 'White Guinea Yam'],
+    '500g Spaghetti': ['Power Pasta', 'Crown Premium', 'Honywell'],
     'Garri': ['Brown', 'White'],
+    'Noodles': [],
+    'Kilo of Fish': [
+      'Alaran/Sardines',
+          'Panla',
+          'Express',
+          'Shawa/Mackerel',
+          'Croaker',
+          'Catfish',
+          'Bonga',
+    ],
     'Basket Of Cassava': null,
   };
 
@@ -354,6 +366,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
   String? selectedSubtype;
   String? customSubtype;
   TextEditingController priceController = TextEditingController();
+  FocusNode priceFocusNode = FocusNode();
 
   void _notifyParent() {
     widget.onFoodDataChanged({
@@ -366,7 +379,8 @@ class _FoodDropdownState extends State<FoodDropdown> {
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
-    var format = NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -375,7 +389,8 @@ class _FoodDropdownState extends State<FoodDropdown> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
+              border: Border.all(
+                  color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               hint: const Column(
@@ -384,11 +399,13 @@ class _FoodDropdownState extends State<FoodDropdown> {
                 children: [
                   Text(
                     "Select FoodItems",
-                    style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    style: TextStyle(
+                        fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
                   ),
                   SizedBox(height: 5),
                   Text("Food Items",
-                      style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
+                      style: TextStyle(
+                          fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
                 ],
               ),
               isExpanded: true,
@@ -433,6 +450,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
           ),
           obsecureText: false,
           controller: priceController,
+          focusNode: priceFocusNode,
           onChanged: (value) => _notifyParent(),
         ),
       ],
@@ -451,7 +469,8 @@ class _FoodDropdownState extends State<FoodDropdown> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
+                border: Border.all(
+                    color: const Color.fromRGBO(76, 194, 201, 1), width: 1)),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 hint: const Column(
@@ -459,12 +478,15 @@ class _FoodDropdownState extends State<FoodDropdown> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "SubType",
-                      style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                      "Type",
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Color.fromRGBO(184, 184, 184, 1)),
                     ),
                     SizedBox(height: 5),
-                    Text("Select SubType",
-                        style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
+                    Text("Select Type",
+                        style: TextStyle(
+                            fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
                   ],
                 ),
                 isExpanded: true,
@@ -492,15 +514,18 @@ class _FoodDropdownState extends State<FoodDropdown> {
               child: TextFormField(
                 decoration: InputDecoration(
                   enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+                    borderSide:
+                        BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
                   ),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
                   fillColor: Colors.grey.shade100,
                   filled: true,
-                  hintText: "Custom SubType",
-                  hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+                  hintText: "Custom Type",
+                  hintStyle:
+                      const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20.0, horizontal: 20.0),
                 ),
                 onChanged: (value) {
                   customSubtype = value;
@@ -513,5 +538,3 @@ class _FoodDropdownState extends State<FoodDropdown> {
     }
   }
 }
-
-

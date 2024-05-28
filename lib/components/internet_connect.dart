@@ -44,11 +44,11 @@ class _InternetStatusState extends State<InternetStatus> {
   Widget build(BuildContext context) {
     String status;
     if (_connectivityResult == ConnectivityResult.mobile) {
-      status = "Online Mode";
+      status = "Connected To Server";
     } else if (_connectivityResult == ConnectivityResult.wifi) {
       status = "Connected to WiFi";
     } else {
-      status = "Offline Mode";
+      status = "No Internet Access";
     }
 
     return Container(

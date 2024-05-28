@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Pricesense",
+              "PriceIntel",
               style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,

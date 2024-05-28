@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:io';
+//import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'package:pricesense/components/custom_dropdown.dart';
 import 'package:pricesense/components/food_dropdown.dart';
 import 'package:pricesense/components/text_input.dart';
@@ -20,13 +20,18 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool isCompleted = false;
-   Map<String, String> selectedFoodData = {};
+  Map<String, String> selectedFoodData = {};
 
   final TextEditingController priceInformantNameController =
       TextEditingController();
   final TextEditingController estimatePriceController = TextEditingController();
   final TextEditingController remarksController = TextEditingController();
-  final TextEditingController weightsController = TextEditingController();
+  final TextEditingController remarksApplicableController = TextEditingController();
+  final FocusNode priceInformantFocusNode = FocusNode();
+  final FocusNode estimatePriceFocusNode = FocusNode();
+  final FocusNode remarksFocusNode = FocusNode();
+  final FocusNode weightstFocusNode = FocusNode();
+  final FocusNode  remarksApplicableFocusNode = FocusNode();  
 
   List<String> coordinatorsList = [
     'Udosen Emma',
@@ -55,7 +60,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 3) {
+    if (_currentPage < 2) {
       setState(() {
         _currentPage++;
       });
@@ -120,13 +125,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   child: Column(
                     children: [
                       LinearProgressIndicator(
-                        value: (_currentPage + 1) / 4,
+                        value: (_currentPage + 1) / 3,
                         backgroundColor: Colors.grey.shade200,
                         color: const Color.fromRGBO(76, 194, 201, 1),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Step ${_currentPage + 1} of 4",
+                        "Step ${_currentPage + 1} of 3",
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color.fromRGBO(76, 194, 201, 1),
@@ -147,7 +152,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     children: [
                       _buildPage1(),
                       _buildPage2(),
-                      _buildPage3(),
+                     // _buildPage3(),
                       _buildSummaryPage(),
                     ],
                   ),
@@ -173,6 +178,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
             ),
             const SizedBox(height: 16),
             TextInput(
+              focusNode: priceInformantFocusNode,
               text: "Price Informant Name",
               obsecureText: false,
               controller: priceInformantNameController,
@@ -181,7 +187,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 Icons.person,
                 color: Color.fromRGBO(76, 194, 201, 1),
                 size: Sizes.iconSize,
-              ), onChanged: (value) {  },
+              ),
+              onChanged: (value) {},
             ),
             const SizedBox(height: 8),
             CustomDropdown(
@@ -241,7 +248,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
             const SizedBox(
               height: 10,
             ),
-      FoodDropdown(
+            FoodDropdown(
               onFoodDataChanged: (Map<String, String> foodData) {
                 setState(() {
                   selectedFoodData = foodData;
@@ -252,29 +259,33 @@ class _CollectionScreenState extends State<CollectionScreen> {
               height: 10,
             ),
             const Text(
-              "Input Weight If Applicable",
-              style: TextStyle(fontSize: 16,color: Color.fromRGBO(76, 194, 201, 1)),
+              "Remarks If Applicable",
+              style: TextStyle(
+                  fontSize: 16, color: Color.fromRGBO(76, 194, 201, 1)),
             ),
             const SizedBox(
               height: 5,
             ),
             TextInput(
-                text: "Weight in KG/G",
-                obsecureText: false,
-                controller: weightsController,
-                textInputType: TextInputType.number,
-                widget: const Icon(
-                  Icons.scale,
-                  color: Color.fromRGBO(76, 194, 201, 1),
-                  size: Sizes.iconSize,
-                ), onChanged: (value) { },),
+              text: "Remarks",
+              obsecureText: false,
+              controller: remarksApplicableController,
+              textInputType: TextInputType.text,
+              widget: const Icon(
+                Icons.note_add,
+                color: Color.fromRGBO(76, 194, 201, 1),
+                size: Sizes.iconSize,
+              ),
+              onChanged: (value) {},
+              focusNode: remarksApplicableFocusNode,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPage3() {
+ /* Widget _buildPage3() {
     Localizations.localeOf(context);
     var format =
         NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
@@ -290,6 +301,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
           ),
           const SizedBox(height: 16),
           TextInput(
+            focusNode:estimatePriceFocusNode,
             text: "Estimate Price",
             obsecureText: false,
             controller: estimatePriceController,
@@ -308,50 +320,54 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   ),
                 ],
               ),
-            ), onChanged: (value) {},
+            ),
+            onChanged: (value) {},
           ),
           const SizedBox(height: 8),
           TextInput(
-              text: "Remarks",
-              obsecureText: false,
-              controller: remarksController,
-              textInputType: TextInputType.text,
-              widget: const Icon(
-                Icons.edit_note,
-                color: Color.fromRGBO(76, 194, 201, 1),
-                size: Sizes.iconSize,
-              ), onChanged: (value) {  },),
+            focusNode: remarksFocusNode,
+            text: "Remarks",
+            obsecureText: false,
+            controller: remarksController,
+            textInputType: TextInputType.text,
+            widget: const Icon(
+              Icons.edit_note,
+              color: Color.fromRGBO(76, 194, 201, 1),
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+          ),
         ],
       ),
     );
-  }
+  }*/
 
   Widget _buildSummaryPage() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
-        scrollDirection:Axis.vertical,
+        scrollDirection: Axis.vertical,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               "Summary",
-              style:
-                  TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+              style: TextStyle(
+                  fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
             ),
             const SizedBox(height: 16),
             _buildSummaryItem(
                 "Price Informant Name:", priceInformantNameController.text),
             _buildSummaryItem("Coordinator:", coordinatorValue ?? ""),
             _buildSummaryItem("Market:", marketValue ?? ""),
-            _buildSummaryItem("Distribution Type:", distributionTypeValue ?? ""),
-              _buildSummaryItem("Food Item:", selectedFoodData['foodItem'] ?? ""),
-              _buildSummaryItem("Subtype:", selectedFoodData['subtype'] ?? ""),
-              _buildSummaryItem("Price:", selectedFoodData['price'] ?? ""),
-             _buildSummaryItem("Weights",weightsController.text),
+            _buildSummaryItem(
+                "Distribution Type:", distributionTypeValue ?? ""),
+            _buildSummaryItem("Food Item:", selectedFoodData['foodItem'] ?? ""),
+            _buildSummaryItem("Subtype:", selectedFoodData['subtype'] ?? ""),
+            _buildSummaryItem("Price:", selectedFoodData['price'] ?? ""),
+            _buildSummaryItem("Weights", remarksApplicableController.text),
             _buildSummaryItem("Estimate Price:", estimatePriceController.text),
             _buildSummaryItem("Remarks:", remarksController.text),
-            
           ],
         ),
       ),
@@ -378,7 +394,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget _buildNavigationButtons() {
-    final isLastPage = _currentPage == 3;
+    final isLastPage = _currentPage == 2;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -435,4 +451,3 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }
 }
-

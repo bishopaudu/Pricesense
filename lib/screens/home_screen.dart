@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,11 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
       if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks.first;
         setState(() {
-          locationState = placemark.administrativeArea   ?? "Error";
+          locationState = placemark.administrativeArea ?? "Error";
           locationCity = placemark.locality ?? "Error";
         });
       }
     } catch (e) {
+      setState(() {
+        locationCity = "Turn on Location Services";
+      });
       print('Error fetching location: $e');
     }
   }
@@ -69,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Grid list
   final List<Widget> gridItems = [
-    _buildGridItem("20", "Collected"),
-    _buildGridItem("15", "Commodities Data"),
-    _buildGridItem("30", "Uploaded"),
+    _buildGridItem("20", "Completed"),
+    _buildGridItem("15", "Pending"),
+    _buildGridItem("30", "Report Submitted"),
     const InternetStatus(),
   ];
 
@@ -130,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "AGENT NAME",
+          "PriceIntel",
           style: TextStyle(
               color: Color.fromRGBO(76, 194, 201, 1),
               fontWeight: FontWeight.w400),
@@ -148,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
             size: Sizes.iconSize,
           ),
         ),
-      
         centerTitle: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -201,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
- /* Widget _buildLocationInfo() {
+  /* Widget _buildLocationInfo() {
     return Container(
       height: 100,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -238,41 +242,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }*/
   Widget _buildLocationInfo() {
-  return Container(
-    height: 100,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(10),
-      color: const Color.fromRGBO(76, 193, 201, 1),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Icon(Icons.place, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(locationCity, style: const TextStyle(fontSize: 16, color: Colors.white)),
-                const SizedBox(width: 3),
-                Text(locationState, style: const TextStyle(fontSize: 16, color: Colors.white))
-              ],
-            ),
-            const Row(
-              children: [
-                Text("AGENT ID: ", style: TextStyle(fontSize: 18, color: Colors.white)),
-                Text("74838939944", style: TextStyle(fontSize: 16, color: Colors.white)),
-              ],
-            )
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color.fromRGBO(76, 193, 201, 1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(Icons.place, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(locationCity,
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.white)),
+                  const SizedBox(width: 3),
+                  Text(locationState,
+                      style: const TextStyle(fontSize: 16, color: Colors.white))
+                ],
+              ),
+              const Row(
+                children: [
+                  Text("AGENT ID: ",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
+                  Text("665427e3f7a81f8e44ad3bec",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                ],
+              ),
+              Row(
+                children:[
+                  Text("NAME:",style: TextStyle(fontSize: 18, color: Colors.white)),
+                   Text("Kunle Okoro",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                ]
+              ),
+                Row(
+                children:[
+                  Text("EMAIL:",style: TextStyle(fontSize: 18, color: Colors.white)),
+                   Text("Kunleokoro@gmail.com",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                ]
+              ),
+          
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

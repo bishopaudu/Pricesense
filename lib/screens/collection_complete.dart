@@ -84,7 +84,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
             FadeTransition(
               opacity: _opacityAnimation,
               child: const Text(
-                'Successfully Uploaded',
+                'Successfully Submitted',
                 style: TextStyle(fontSize: 20, color: Colors.green),
               ),
             ),
@@ -100,27 +100,38 @@ class _CollectionCompleteState extends State<CollectionComplete>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                   backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                   ),
                   child: const Text("New Collection", style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(width: 10,),
-                  ElevatedButton(
-                  onPressed: goHome,
-                  style: ElevatedButton.styleFrom(
-                    textStyle: const TextStyle(fontSize: 20),
-                    minimumSize: const Size(150, 45), 
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  ),
-                  child: const Text("Go Home", style: TextStyle(color: Colors.white)),
+                  Container(
+                    decoration: BoxDecoration(
+                      
+                       borderRadius: BorderRadius.circular(8),
+                color:  Colors.white,
+                border: Border.all(
+                  color: const Color.fromRGBO(76, 194, 201, 1),
+                  width: 1,
                 ),
+                    ),
+                    child: ElevatedButton(
+                    onPressed: goHome,
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 20),
+                      minimumSize: const Size(150, 45), 
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    ),
+                    child: const Text("Go Home", style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1))),
+                                    ),
+                  ),
               ],
             ),
           ],
