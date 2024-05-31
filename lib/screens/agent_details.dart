@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pricesense/screens/home_screen.dart';
+import 'package:pricesense/screens/feedbackscreen.dart';
+import 'package:pricesense/screens/login.dart';
+//import 'package:pricesense/screens/home_screen.dart';
 import 'package:pricesense/utils/sizes.dart';
 
 class AgentDetails extends StatefulWidget {
@@ -19,37 +22,45 @@ class _AgentDetailsState extends State<AgentDetails> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Send Feedback',style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1)),),
+          title: const Text(
+            'Send Feedback',
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text('Please enter your feedback below:',style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1)),),
+                const Text('Please enter your feedback below:'),
                 const SizedBox(height: 10),
                 TextField(
                   controller: feedbackController,
                   maxLines: 3,
-                    decoration: const InputDecoration(
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
-            ),
-            focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white)),
-                    hintText: 'Enter your feedback',
-                    hintStyle: TextStyle(color:Color.fromRGBO(76, 194, 201, 1))
-                  ),
+                  decoration: const InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white)),
+                      hintText: 'Enter your feedback',
+                      hintStyle:
+                          TextStyle(color: Color.fromRGBO(76, 194, 201, 1))),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel',style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1)),),
+              child: const Text(
+                'Cancel',
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Submit',style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1)),),
+              child: const Text(
+                'Submit',
+                style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+              ),
               onPressed: () {
                 print('Feedback: ${feedbackController.text}');
                 Navigator.of(context).pop();
@@ -66,13 +77,6 @@ class _AgentDetailsState extends State<AgentDetails> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()));
-          },
-        ),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -85,7 +89,7 @@ class _AgentDetailsState extends State<AgentDetails> {
               ),
               const SizedBox(height: 16),
               const Text(
-                "Julia Mark",
+                "Kunle Okoro",
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w400,
@@ -96,7 +100,7 @@ class _AgentDetailsState extends State<AgentDetails> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("julia2009@gmail.com",
+                    Text("kunleokoro@gmail.com",
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400)),
                     VerticalDivider(
@@ -117,7 +121,10 @@ class _AgentDetailsState extends State<AgentDetails> {
                 icon: Icons.person_2,
                 title: "Profile",
                 children: [
-                  _buildInfoRow(Icons.language, "Language", "ENGLISH"),
+                  _buildInfoRow(
+                    Icons.logout,
+                    "Logout",
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -126,7 +133,13 @@ class _AgentDetailsState extends State<AgentDetails> {
                 title: "Feedback",
                 children: [
                   GestureDetector(
-                    onTap:(){openDialogBox(context);},
+                      onTap: () {
+                        //openDialogBox(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FeedbackScreen()));
+                      },
                       child: _buildInfoRow(Icons.live_help, "Send Feedback")),
                 ],
               ),

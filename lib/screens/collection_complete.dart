@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:pricesense/screens/collection_screen.dart';
+import 'package:pricesense/screens/category_selection.dart';
 import 'package:pricesense/screens/home_screen.dart';
 
 class CollectionComplete extends StatefulWidget {
@@ -48,7 +48,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
   void goBack() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CollectionScreen()),
+      MaterialPageRoute(builder: (context) => CategorySelectionScreen()),
     );
   }
 
@@ -89,7 +89,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
               ),
             ),
             const SizedBox(height: 20),
-            Row(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
@@ -106,7 +106,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
                   ),
                   child: const Text("New Collection", style: TextStyle(color: Colors.white)),
                 ),
-                const SizedBox(width: 10,),
+                const SizedBox(height: 10,),
                   Container(
                     decoration: BoxDecoration(
                       

@@ -8,7 +8,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pricesense/components/internet_connect.dart';
 import 'package:pricesense/screens/agent_details.dart';
-import 'package:pricesense/screens/collection_screen.dart';
+import 'package:pricesense/screens/category_selection.dart';
+//import 'package:pricesense/screens/collection_screen.dart';
 import 'package:pricesense/utils/sizes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
       if (status.isGranted) {
         await fetchLocation();
       } else {
-        _showPermissionDialog();
+        //_showPermissionDialog();
+        setState(() {
+          locationCity = "Turn on Location Services";
+        });
       }
     }
   }
@@ -57,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _showPermissionDialog() {
+  /*void _showPermissionDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -70,14 +74,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
+  }*/
 
   // Grid list
   final List<Widget> gridItems = [
     _buildGridItem("20", "Completed"),
     _buildGridItem("15", "Pending"),
     _buildGridItem("30", "Report Submitted"),
-    const InternetStatus(),
+    _buildGridItem("20", "uploaded")
+    //const InternetStatus(),
   ];
 
   static Widget _buildGridItem(String number, String label) {
@@ -171,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CollectionScreen()),
+            MaterialPageRoute(builder: (context) => CategorySelectionScreen()),
           );
         },
       ),
@@ -244,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildLocationInfo() {
     return Container(
       height: 120,
-      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: const Color.fromRGBO(76, 193, 201, 1),
@@ -259,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Icon(Icons.place, color: Colors.white),
+                  const Icon(Icons.place, color: Colors.white,size: Sizes.iconSize,),
                   const SizedBox(width: 8),
                   Text(locationCity,
                       style:
@@ -269,29 +274,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: const TextStyle(fontSize: 16, color: Colors.white))
                 ],
               ),
-              const Row(
-                children: [
-                  Text("AGENT ID: ",
-                      style: TextStyle(fontSize: 18, color: Colors.white)),
-                  Text("665427e3f7a81f8e44ad3bec",
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
-                ],
-              ),
-              Row(
-                children:[
-                  Text("NAME:",style: TextStyle(fontSize: 18, color: Colors.white)),
-                   Text("Kunle Okoro",
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
-                ]
-              ),
-                Row(
-                children:[
-                  Text("EMAIL:",style: TextStyle(fontSize: 18, color: Colors.white)),
-                   Text("Kunleokoro@gmail.com",
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
-                ]
-              ),
-          
+              const SizedBox(width: 8),
+             const InternetStatus(),
+             const SizedBox(width: 8),
+              const Row(children: [
+                Text("Agent ID:",
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
+          const SizedBox(width:3),
+                Text("6658a33676caef7d5cd281f7",
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
+              ]),
+              /*const SizedBox(width: 8),
+              const Row(children: [
+                 Icon(Icons.email,size: Sizes.iconSize,
+          color:Colors.white,),
+          const SizedBox(width: 8),
+                Text("Kunleokoro@gmail.com",
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
+              ]),*/
             ],
           ),
         ],

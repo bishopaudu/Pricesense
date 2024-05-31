@@ -254,7 +254,8 @@ class _FirstScreenState extends State<FirstScreen> {
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pricesense/screens/agent_details.dart';
-import 'package:pricesense/screens/collection_screen.dart';
+import 'package:pricesense/screens/category_selection.dart';
+//import 'package:pricesense/screens/collection_screen.dart';
 import 'package:pricesense/screens/history_screen.dart';
 import 'package:pricesense/screens/home_screen.dart';
 import 'package:pricesense/utils/sizes.dart';
@@ -278,7 +279,7 @@ class _FirstScreenState extends State<FirstScreen> {
 
   static final List<Widget> _pages = <Widget>[
     const HomeScreen(),
-    const CollectionScreen(),
+     CategorySelectionScreen(),
     const HistoryScreen(),
     const AgentDetails(),
   ];
@@ -330,6 +331,7 @@ class _FirstScreenState extends State<FirstScreen> {
           }).values.toList(),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _selectedIndex,
