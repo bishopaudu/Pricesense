@@ -12,28 +12,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final TextEditingController searchController = TextEditingController();
   final List<Map<String, String>> surveyHistory = [
     {
-      "title": "Coordinator 3",
-      "subtitle": "Details for Ariria Market Survey",
+      "title": "Garri",
+      "subtitle": "Ariria Market",
       "date": "2023-05-21"
     },
     {
-      "title": "Coordinator 12",
-      "subtitle": "Details for Itam Market Survey",
+      "title": "Rice",
+      "subtitle": "Itam Market",
       "date": "2023-05-20"
     },
     {
-      "title": "Corordinator 3",
-      "subtitle": "Details for Small Market(Uyo) Survey",
+      "title": "Yam",
+      "subtitle": "Small Market(Uyo)",
       "date": "2023-05-19"
     },
     {
-      "title": "Coordinator 4",
-      "subtitle": "Deyails for Watt Market Survey",
+      "title": "Bag of flour",
+      "subtitle": "Watt Market",
       "date": "2023-05-18"
     },
     {
-      "title": "Coordinator 13",
-      "subtitle": "Details for West Market Survey",
+      "title": "Beans",
+      "subtitle": "West Market",
       "date": "2023-05-17"
     },
    

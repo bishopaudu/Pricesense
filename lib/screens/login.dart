@@ -175,19 +175,22 @@ class _LoginState extends State<Login> {
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/model/user_model.dart';
+import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/first_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:pricesense/utils/sizes.dart';
 
-class Login extends StatefulWidget {
+class Login extends ConsumerStatefulWidget{
   const Login({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  ConsumerState<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends ConsumerState<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode usernameFocusNode = FocusNode();
@@ -280,6 +283,8 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (responseData.containsKey('token')) {
+            final user = UserData.fromJson(responseData);
+          ref.read(userProvider.notifier).setUser(user);
           navigate();
         } else {
           showErrorDialog(responseData['message'] ?? 'Login failed');

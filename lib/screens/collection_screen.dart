@@ -1,8 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:pricesense/components/city_search.dart';
+import 'package:intl/intl.dart';
 import 'package:pricesense/components/custom_dropdown.dart';
 import 'package:pricesense/components/food_dropdown.dart';
 import 'package:pricesense/components/text_input.dart';
@@ -32,6 +31,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final TextEditingController cityController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
+  final TextEditingController taxandLeviesController = TextEditingController();
+  final TextEditingController shoprentController = TextEditingController();
 
   final FocusNode priceInformantFocusNode = FocusNode();
   final FocusNode remarksFocusNode = FocusNode();
@@ -40,6 +41,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final FocusNode brandsFocusNode = FocusNode();
   final FocusNode dateFocusNode = FocusNode();
   final FocusNode timeFocusNode = FocusNode();
+  final FocusNode taxandLeviesFocusNode = FocusNode();
+  final FocusNode shoprentFocusNode = FocusNode();
 
   String? coordinatorValue;
   String? marketValue;
@@ -49,7 +52,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   String? city;
   String? _filePath;
   DateTime dateTime = DateTime.now();
-  TimeOfDay timeOfDay = TimeOfDay.now();
+  //TimeOfDay timeOfDay = TimeOfDay.now();
   bool timeText = false;
   bool dateText = false;
 
@@ -92,13 +95,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
     });
   }
 
-
-
   Future<DateTime?> selectDate() => showDatePicker(
       context: context, firstDate: DateTime(2000), lastDate: DateTime(2100));
-
-  Future<TimeOfDay?> selectTime() =>
-      showTimePicker(context: context, initialTime: TimeOfDay.now());
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +206,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 color: Color.fromRGBO(76, 194, 201, 1),
                 size: Sizes.iconSize,
               ),
-              onChanged: (value) {}, labelText: "Price Informant Name",
+              onChanged: (value) {},
+              labelText: "Price Informant Name",
             ),
             const SizedBox(height: 8),
             CustomDropdown(
@@ -253,8 +252,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget _buildPage2() {
-    final hour = timeOfDay.hour.toString().padLeft(2, '0');
-    final minutes = timeOfDay.minute.toString().padLeft(2, '0');
+    Localizations.localeOf(context);
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -292,7 +292,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 });
               },
             ),
-            const SizedBox(
+            /*const SizedBox(
               height: 8,
             ),
             Container(
@@ -307,7 +307,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 ),
               ),
               child: ElevatedButton(
-                onPressed:(){},
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
@@ -322,122 +322,98 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     Icon(Icons.photo_camera,
                         size: Sizes.iconSize, color: Colors.white),
                     SizedBox(width: 5),
-                    Text("View Photo",
-                        style: TextStyle(color: Colors.white)),
+                    Text("View Photo", style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
-            ),
+            ),*/
             const SizedBox(
               height: 8,
             ),
             Column(
               children: [
-                TextInput(
-                    textInputType: TextInputType.none,
-                    text: "Select Date",
-                    widget: IconButton(
-                      onPressed: () async {
-                        final date = await selectDate();
-                        if (date == null) {
-                          return;
-                        }
-                        setState(() {
-                          dateTime = date;
-                          // dateText = true;
-                          dateController.text =
-                              '${dateTime.year}/${dateTime.month}/${dateTime.day}';
-                        });
-                      },
-                      icon: const Icon(
+                GestureDetector(
+                  onTap: () async {
+                    final date = await selectDate();
+                    if (date != null) {
+                      setState(() {
+                        dateTime = date;
+                        dateController.text =
+                            '${dateTime!.year}/${dateTime!.month}/${dateTime!.day}';
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextInput(
+                      textInputType: TextInputType.none,
+                      text: "Select Date",
+                      widget: Icon(
                         Icons.event,
                         size: Sizes.iconSize,
                         color: Color.fromRGBO(76, 194, 201, 1),
                       ),
+                      obsecureText: false,
+                      controller: dateController,
+                      focusNode: dateFocusNode,
+                      onChanged: (value) {},
+                      labelText: 'Select Date',
                     ),
-                    obsecureText: false,
-                    controller: dateController,
-                    focusNode: dateFocusNode,
-                    onChanged: (value) {}, labelText: 'Select Date',),
+                  ),
+                ),
                 const SizedBox(
                   height: 8,
                 ),
                 TextInput(
-                    textInputType: TextInputType.none,
-                    text: "Select Time",
-                    widget: IconButton(
-                      onPressed: () async {
-                        final time = await selectTime();
-                        if (time == null) {
-                          return;
-                        }
-                        setState(() {
-                          timeOfDay = time;
-                          //timeText = true;
-                          timeController.text = '$hour:$minutes';
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.schedule,
-                        size: Sizes.iconSize,
-                        color: Color.fromRGBO(76, 194, 201, 1),
+                    labelText: 'Tax/Levies',
+                    textInputType: TextInputType.number,
+                    text: 'Tax/Levies',
+                    widget: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            format.currencySymbol,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(76, 194, 201, 1),
+                              fontSize: Sizes.iconSize,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     obsecureText: false,
-                    controller: timeController,
-                    focusNode: timeFocusNode,
-                    onChanged: (value) {}, labelText: 'Select Time',),
+                    controller: taxandLeviesController,
+                    focusNode: taxandLeviesFocusNode,
+                    onChanged: (value) {}),
+                const SizedBox(
+                  height: 8,
+                ),
+                TextInput(
+                    labelText: 'Shop Rent',
+                    textInputType: TextInputType.number,
+                    text: 'Shop Rent',
+                    widget: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            format.currencySymbol,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(76, 194, 201, 1),
+                              fontSize: Sizes.iconSize,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    obsecureText: false,
+                    controller: shoprentController,
+                    focusNode: shoprentFocusNode,
+                    onChanged: (value) {})
               ],
             ),
-           /* const SizedBox(
-              height: 8,
-            ),
-            TextInput(
-                textInputType: TextInputType.name,
-                text: "Brand(Optional)",
-                widget: const Icon(
-                  Icons.label_important,
-                  size: Sizes.iconSize,
-                  color: Color.fromRGBO(76, 194, 201, 1),
-                ),
-                obsecureText: false,
-                controller: brandsController,
-                focusNode: brandsFocusNode,
-                onChanged: (value) {}, labelText: '',),
-            const SizedBox(
-              height: 8,
-            ),
-            TextInput(
-              text: "Remarks(Optional)",
-              obsecureText: false,
-              controller: remarksApplicableController,
-              textInputType: TextInputType.text,
-              widget: const Icon(
-                Icons.note_add,
-                color: Color.fromRGBO(76, 194, 201, 1),
-                size: Sizes.iconSize,
-              ),
-              onChanged: (value) {},
-              focusNode: remarksApplicableFocusNode,
-            ),*/
-            /*const SizedBox(
-              height: 8,
-            ),*/
-            /* _pickedImage != null
-                ? Column(
-                    children: [
-                      Image.file(
-                        File(_pickedImage!.path),
-                        height: 200,
-                      ),
-                      const SizedBox(height: 8),
-                      /*Text(
-                        'Image Path: $_filePath',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),*/
-                    ],
-                  )
-                : Text("No Image Selected"),*/
           ],
         ),
       ),
@@ -468,7 +444,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
             _buildSummaryItem("Food Item:", selectedFoodData['foodItem'] ?? ""),
             _buildSummaryItem("Type:", selectedFoodData['subtype'] ?? ""),
             _buildSummaryItem("Price:", selectedFoodData['price'] ?? ""),
-            _buildSummaryItem("Remarks:", remarksController.text),
+            _buildSummaryItem("Shop Rent:", shoprentController.text),
+            _buildSummaryItem("Tax/Levies", taxandLeviesController.text),
             _buildSummaryItem("Image:",
                 _filePath != null ? 'Image Present' : 'No Image Availiable'),
             _buildSummaryItem("Date Submitted:",
@@ -500,7 +477,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }
 
- /* Widget _buildNavigationButtons() {
+  /* Widget _buildNavigationButtons() {
     final isLastPage = _currentPage == 2;
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -558,61 +535,68 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }*/
   Widget _buildNavigationButtons() {
-  final isLastPage = _currentPage == 2;
+    final isLastPage = _currentPage == 2;
 
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (_currentPage > 0)
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (_currentPage > 0)
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color.fromRGBO(76, 194, 201, 1),
+                    width: 1,
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: _previousPage,
+                  style: ElevatedButton.styleFrom(
+
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  child: const Text(
+                    "Back",
+                    style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                  ),
+                ),
+              ),
+            ),
+          if (_currentPage > 0)
+            const SizedBox(width: 8.0), // Add space between buttons
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  width: 1,
-                ),
+                color: const Color.fromRGBO(76, 194, 201, 1),
               ),
               child: ElevatedButton(
-                onPressed: _previousPage,
+                onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
+                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                  elevation: 5,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: const Text(
-                  "Back",
-                  style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                child: Text(
+                  isLastPage ? "Submit" : "Next",
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
           ),
-        if (_currentPage > 0) SizedBox(width: 8.0), // Add space between buttons
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: const Color.fromRGBO(76, 194, 201, 1),
-            ),
-            child: ElevatedButton(
-              onPressed: isLastPage ? _completeForm : _nextPage,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-              ),
-              child: Text(
-                isLastPage ? "Submit" : "Next",
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 }

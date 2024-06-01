@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pricesense/screens/feedbackscreen.dart';
-import 'package:pricesense/screens/login.dart';
-//import 'package:pricesense/screens/home_screen.dart';
 import 'package:pricesense/utils/sizes.dart';
+import 'package:pricesense/screens/profilescreen.dart';
+
 
 class AgentDetails extends StatefulWidget {
   const AgentDetails({super.key});
@@ -16,7 +15,7 @@ class _AgentDetailsState extends State<AgentDetails> {
   bool value = true;
 
 // Function to open the feedback dialog
-  Future<void> openDialogBox(BuildContext context) async {
+  /*Future<void> openDialogBox(BuildContext context) async {
     final TextEditingController feedbackController = TextEditingController();
     return showDialog<void>(
       context: context,
@@ -70,7 +69,7 @@ class _AgentDetailsState extends State<AgentDetails> {
         );
       },
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -117,31 +116,37 @@ class _AgentDetailsState extends State<AgentDetails> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildInfoCard(
-                icon: Icons.person_2,
-                title: "Profile",
-                children: [
-                  _buildInfoRow(
-                    Icons.logout,
-                    "Logout",
-                  ),
-                ],
+              GestureDetector(
+                onTap:(){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => ProfileScreen())));
+                },
+                child: _buildInfoCard(
+                  icon: Icons.person_2,
+                  title: "Profile",
+                  children: [
+                    _buildInfoRow(
+                      Icons.logout,
+                      "Logout",
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 10),
-              _buildInfoCard(
-                icon: Icons.contact_support,
-                title: "Feedback",
-                children: [
-                  GestureDetector(
-                      onTap: () {
-                        //openDialogBox(context);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FeedbackScreen()));
-                      },
-                      child: _buildInfoRow(Icons.live_help, "Send Feedback")),
-                ],
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => FeedbackScreen())));
+                },
+                child: _buildInfoCard(
+                  icon: Icons.contact_support,
+                  title: "Send Feedback",
+                  children: [],
+                ),
               ),
             ],
           ),

@@ -181,34 +181,34 @@ class _OnlineStoresState extends State<OnlineStores> {
                   fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
             ),
             const SizedBox(height: 16),
-            TextInput(
-              textInputType: TextInputType.none,
-              text: "Select Date",
-              widget: IconButton(
-                onPressed: () async {
-                  final date = await selectDate();
-                  if (date == null) {
-                    return;
-                  }
-                  setState(() {
-                    dateTime = date;
-                    // dateText = true;
-                    dateController.text =
-                        '${dateTime.year}/${dateTime.month}/${dateTime.day}';
-                  });
-                },
-                icon: const Icon(
-                  Icons.event,
-                  size: Sizes.iconSize,
-                  color: Color.fromRGBO(76, 194, 201, 1),
+           GestureDetector(
+                  onTap: () async {
+                    final date = await selectDate();
+                    if (date != null) {
+                      setState(() {
+                        dateTime = date;
+                        dateController.text =
+                            '${dateTime!.year}/${dateTime!.month}/${dateTime!.day}';
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextInput(
+                      textInputType: TextInputType.none,
+                      text: "Select Date",
+                      widget: Icon(
+                        Icons.event,
+                        size: Sizes.iconSize,
+                        color: Color.fromRGBO(76, 194, 201, 1),
+                      ),
+                      obsecureText: false,
+                      controller: dateController,
+                      focusNode: dateFocusNode,
+                      onChanged: (value) {},
+                      labelText: 'Select Date',
+                    ),
+                  ),
                 ),
-              ),
-              obsecureText: false,
-              controller: dateController,
-              focusNode: dateFocusNode,
-              onChanged: (value) {},
-              labelText: 'Date',
-            ),
             const SizedBox(height: 8),
            TextInput(
               focusNode: priceInformantFocusNode,

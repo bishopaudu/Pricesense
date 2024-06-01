@@ -95,8 +95,9 @@ class _CollectionCompleteState extends State<CollectionComplete>
                 ElevatedButton(
                   onPressed: goBack,
                   style: ElevatedButton.styleFrom(
+                    //minimumSize: const Size(200, 45), 
                     textStyle: const TextStyle(fontSize: 20),
-                    minimumSize: const Size(150, 45), 
+                    minimumSize: const Size(300, 45), 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -121,7 +122,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
                     onPressed: goHome,
                     style: ElevatedButton.styleFrom(
                       textStyle: const TextStyle(fontSize: 20),
-                      minimumSize: const Size(150, 45), 
+                      minimumSize: const Size(300, 45), 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/text_input.dart';
@@ -61,10 +60,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
    final FocusNode mrrFocusNode = FocusNode();
    final FocusNode interbankFocusNode = FocusNode();
 
-
-
-  
-  
+ 
   Future<DateTime?> selectDate() => showDatePicker(
       context: context, firstDate: DateTime(2000), lastDate: DateTime(2100));
       DateTime dateTime = DateTime.now();
@@ -188,32 +184,34 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                 TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
           ),
           const SizedBox(height: 5),
-          TextInput(
-              textInputType: TextInputType.none,
-              text: "Select Date",
-              widget: IconButton(
-                onPressed: () async {
-                  final date = await selectDate();
-                  if (date == null) {
-                    return;
-                  }
-                  setState(() {
-                    dateTime = date;
-                    // dateText = true;
-                    dateController.text =
-                        '${dateTime.year}/${dateTime.month}/${dateTime.day}';
-                  });
-                },
-                icon: const Icon(
-                  Icons.event,
-                  size: Sizes.iconSize,
-                  color: Color.fromRGBO(76, 194, 201, 1),
+         GestureDetector(
+                  onTap: () async {
+                    final date = await selectDate();
+                    if (date != null) {
+                      setState(() {
+                        dateTime = date;
+                        dateController.text =
+                            '${dateTime!.year}/${dateTime!.month}/${dateTime!.day}';
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextInput(
+                      textInputType: TextInputType.none,
+                      text: "Select Date",
+                      widget: Icon(
+                        Icons.event,
+                        size: Sizes.iconSize,
+                        color: Color.fromRGBO(76, 194, 201, 1),
+                      ),
+                      obsecureText: false,
+                      controller: dateController,
+                      focusNode: dateFocusNode,
+                      onChanged: (value) {},
+                      labelText: 'Select Date',
+                    ),
+                  ),
                 ),
-              ),
-              obsecureText: false,
-              controller: dateController,
-              focusNode: dateFocusNode,
-              onChanged: (value) {}, labelText: 'Date',),
           const SizedBox(
             height: 8,
           ),
@@ -224,7 +222,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             controller: FXController,
             textInputType: TextInputType.name,
             widget: const Icon(
-              Icons.person,
+              Icons.currency_exchange,
               color: Color.fromRGBO(76, 194, 201, 1),
               size: Sizes.iconSize,
             ),
@@ -249,12 +247,35 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                     style: const TextStyle(
                         color: Color.fromRGBO(76, 194, 201, 1),
                         fontSize: Sizes.iconSize,
-                        fontWeight: FontWeight.bold),
+                        ),
                   ),
                 ],
               ),
             ),
             onChanged: (value) {}, labelText: '1 Litre of Petrol',
+          ),
+               TextInput(
+            focusNode: deiselFocusNode,
+            text: "Energy Cost (daily) - 1 Litre of Diesel",
+            obsecureText: false,
+            controller: deiselController,
+            textInputType: TextInputType.number,
+            widget: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    format.currencySymbol,
+                    style: const TextStyle(
+                        color: Color.fromRGBO(76, 194, 201, 1),
+                        fontSize: Sizes.iconSize,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            onChanged: (value) {}, labelText: '1 Litre of Diesel',
           ),
           const SizedBox(
             height: 8,
@@ -307,29 +328,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
           const SizedBox(
             height: 8,
           ),
-           TextInput(
-            focusNode: deiselFocusNode,
-            text: "Energy Cost (daily) - 1 Litre of Diesel",
-            obsecureText: false,
-            controller: deiselController,
-            textInputType: TextInputType.number,
-            widget: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    format.currencySymbol,
-                    style: const TextStyle(
-                        color: Color.fromRGBO(76, 194, 201, 1),
-                        fontSize: Sizes.iconSize,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            onChanged: (value) {}, labelText: '1 Litre of Diesel',
-          ),
+      
         ]),
       ),
     );
