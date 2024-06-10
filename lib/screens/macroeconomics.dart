@@ -22,14 +22,34 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
     });
   }
 
-  void _nextPage() {
-    if (_currentPage < 1) {
+
+  bool _validatePage1() {
+    return dateController.text.isNotEmpty &&
+        FXController.text.isNotEmpty &&
+        energyController.text.isNotEmpty &&
+        deiselController.text.isNotEmpty &&
+        mrrController.text.isNotEmpty &&
+        interbankController.text.isNotEmpty;
+  }
+   void _nextPage() {
+    bool canNavigate = false;
+    if (_currentPage == 0) {
+      canNavigate = _validatePage1();
+    }
+
+    if (canNavigate && _currentPage < 1) {
       setState(() {
         _currentPage++;
       });
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('Please fill all required fields before proceeding.')),
       );
     }
   }
@@ -49,22 +69,21 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
   TextEditingController dateController = TextEditingController();
   TextEditingController FXController = TextEditingController();
   TextEditingController energyController = TextEditingController();
-   TextEditingController mprController = TextEditingController();
-   TextEditingController deiselController = TextEditingController(); 
-   TextEditingController mrrController = TextEditingController(); 
-    TextEditingController interbankController = TextEditingController(); 
-   final FocusNode FXFocusNode = FocusNode();
+  TextEditingController mprController = TextEditingController();
+  TextEditingController deiselController = TextEditingController();
+  TextEditingController mrrController = TextEditingController();
+  TextEditingController interbankController = TextEditingController();
+  final FocusNode FXFocusNode = FocusNode();
   final FocusNode energyFocusNode = FocusNode();
-   final FocusNode mprFocusNode = FocusNode();
-    final FocusNode deiselFocusNode = FocusNode();
-   final FocusNode mrrFocusNode = FocusNode();
-   final FocusNode interbankFocusNode = FocusNode();
+  final FocusNode mprFocusNode = FocusNode();
+  final FocusNode deiselFocusNode = FocusNode();
+  final FocusNode mrrFocusNode = FocusNode();
+  final FocusNode interbankFocusNode = FocusNode();
 
- 
   Future<DateTime?> selectDate() => showDatePicker(
       context: context, firstDate: DateTime(2000), lastDate: DateTime(2100));
-      DateTime dateTime = DateTime.now();
-   final FocusNode dateFocusNode = FocusNode();
+  DateTime dateTime = DateTime.now();
+  final FocusNode dateFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,10 +93,9 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
           style:
               TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
         ),
-        
       ),
       body: isCompleted
-          ? CollectionComplete()
+          ? const CollectionComplete()
           : Column(
               children: [
                 Padding(
@@ -120,6 +138,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             ),
     );
   }
+
   Widget _buildSummaryPage() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -138,18 +157,22 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                 "Daily Foreign Exchange Rate (Naira/USD)", FXController.text),
             _buildSummaryItem("Date Submitted:",
                 '${dateTime.year}/${dateTime.month}/${dateTime.day}'),
-                  _buildSummaryItem("Minimum Rediscount Rate (MRR)",mprController.text),
-                  _buildSummaryItem("Energy Cost (daily) - 1 Litre of Petrol",energyController.text),
-                  _buildSummaryItem("Minimum Rediscount Rate (MRR)",mrrController.text),
-                   _buildSummaryItem("Inter-Bank Call Rate",interbankController.text),
-                _buildSummaryItem( "Energy Cost (daily) - 1 Litre of Diesel",deiselController.text),
+            _buildSummaryItem(
+                "Minimum Rediscount Rate (MRR)", mprController.text),
+            _buildSummaryItem("Energy Cost (daily) - 1 Litre of Petrol",
+                energyController.text),
+            _buildSummaryItem(
+                "Minimum Rediscount Rate (MRR)", mrrController.text),
+            _buildSummaryItem("Inter-Bank Call Rate", interbankController.text),
+            _buildSummaryItem("Energy Cost (daily) - 1 Litre of Diesel",
+                deiselController.text),
           ],
         ),
       ),
     );
   }
 
-   Widget _buildSummaryItem(String title, String value) {
+  Widget _buildSummaryItem(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -170,7 +193,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
   }
 
   Widget _buildPage1() {
-     Localizations.localeOf(context);
+    Localizations.localeOf(context);
     var format =
         NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Padding(
@@ -184,59 +207,63 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                 TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
           ),
           const SizedBox(height: 5),
-         GestureDetector(
-                  onTap: () async {
-                    final date = await selectDate();
-                    if (date != null) {
-                      setState(() {
-                        dateTime = date;
-                        dateController.text =
-                            '${dateTime!.year}/${dateTime!.month}/${dateTime!.day}';
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextInput(
-                      textInputType: TextInputType.none,
-                      text: "Select Date",
-                      widget: Icon(
-                        Icons.event,
-                        size: Sizes.iconSize,
-                        color: Color.fromRGBO(76, 194, 201, 1),
-                      ),
-                      obsecureText: false,
-                      controller: dateController,
-                      focusNode: dateFocusNode,
-                      onChanged: (value) {},
-                      labelText: 'Select Date',
-                    ),
-                  ),
+          GestureDetector(
+            onTap: () async {
+              final date = await selectDate();
+              if (date != null) {
+                setState(() {
+                  dateTime = date;
+                  dateController.text =
+                      '${dateTime.year}/${dateTime.month}/${dateTime.day}';
+                });
+              }
+            },
+            child: AbsorbPointer(
+              child: TextInput(
+                enabled: true,
+                textInputType: TextInputType.none,
+                text: "Select Date",
+                widget: const Icon(
+                  Icons.event,
+                  size: Sizes.iconSize,
+                  color: Color.fromRGBO(76, 194, 201, 1),
                 ),
+                obsecureText: false,
+                controller: dateController,
+                focusNode: dateFocusNode,
+                onChanged: (value) {},
+                labelText: 'Select Date',
+              ),
+            ),
+          ),
           const SizedBox(
             height: 8,
           ),
           TextInput(
+            enabled: true,
             focusNode: FXFocusNode,
             text: "Daily Foreign Exchange Rate (Naira/USD)",
             obsecureText: false,
             controller: FXController,
-            textInputType: TextInputType.name,
+            textInputType: TextInputType.number,
             widget: const Icon(
               Icons.currency_exchange,
               color: Color.fromRGBO(76, 194, 201, 1),
               size: Sizes.iconSize,
             ),
-            onChanged: (value) {}, labelText: 'Foreign Exchange Rate',
+            onChanged: (value) {},
+            labelText: 'Foreign Exchange Rate',
           ),
           const SizedBox(
             height: 8,
           ),
           TextInput(
+            enabled: true,
             focusNode: energyFocusNode,
             text: "Energy Cost (daily) - 1 Litre of Petrol",
             obsecureText: false,
             controller: energyController,
-            textInputType: TextInputType.name,
+            textInputType: TextInputType.number,
             widget: Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
@@ -245,16 +272,21 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                        color: Color.fromRGBO(76, 194, 201, 1),
-                        fontSize: Sizes.iconSize,
-                        ),
+                      color: Color.fromRGBO(76, 194, 201, 1),
+                      fontSize: Sizes.iconSize,
+                    ),
                   ),
                 ],
               ),
             ),
-            onChanged: (value) {}, labelText: '1 Litre of Petrol',
+            onChanged: (value) {},
+            labelText: '1 Litre of Petrol',
           ),
-               TextInput(
+           const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
             focusNode: deiselFocusNode,
             text: "Energy Cost (daily) - 1 Litre of Diesel",
             obsecureText: false,
@@ -268,19 +300,21 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                        color: Color.fromRGBO(76, 194, 201, 1),
-                        fontSize: Sizes.iconSize,
-                        ),
+                      color: Color.fromRGBO(76, 194, 201, 1),
+                      fontSize: Sizes.iconSize,
+                    ),
                   ),
                 ],
               ),
             ),
-            onChanged: (value) {}, labelText: '1 Litre of Diesel',
+            onChanged: (value) {},
+            labelText: '1 Litre of Diesel',
           ),
           const SizedBox(
             height: 8,
           ),
           TextInput(
+            enabled: true,
             focusNode: mprFocusNode,
             text: "Monetary Policy Rate (MPR)",
             obsecureText: false,
@@ -291,12 +325,14 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
               color: Color.fromRGBO(76, 194, 201, 1),
               size: Sizes.iconSize,
             ),
-            onChanged: (value) {}, labelText: 'Monetary Policy Rate(MPR)',
+            onChanged: (value) {},
+            labelText: 'Monetary Policy Rate(MPR)',
           ),
           const SizedBox(
             height: 8,
           ),
-           TextInput(
+          TextInput(
+            enabled: true,
             focusNode: mrrFocusNode,
             text: "Minimum Rediscount Rate (MRR)",
             obsecureText: false,
@@ -307,12 +343,14 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
               color: Color.fromRGBO(76, 194, 201, 1),
               size: Sizes.iconSize,
             ),
-            onChanged: (value) {}, labelText: "Minimum Rediscount Rate (MRR)",
+            onChanged: (value) {},
+            labelText: "Minimum Rediscount Rate (MRR)",
           ),
           const SizedBox(
             height: 8,
           ),
-             TextInput(
+          TextInput(
+            enabled: true,
             focusNode: interbankFocusNode,
             text: "Inter-Bank Call Rate",
             obsecureText: false,
@@ -323,16 +361,17 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
               color: Color.fromRGBO(76, 194, 201, 1),
               size: Sizes.iconSize,
             ),
-            onChanged: (value) {}, labelText: "Inter-Bank Call Rate",
+            onChanged: (value) {},
+            labelText: "Inter-Bank Call Rate",
           ),
           const SizedBox(
             height: 8,
           ),
-      
         ]),
       ),
     );
   }
+
   /*Widget _buildNavigationButtons() {
     final isLastPage = _currentPage == 1;
     return Padding(
@@ -391,60 +430,64 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
     );
   }*/
   Widget _buildNavigationButtons() {
-  final isLastPage = _currentPage == 1;
+    final isLastPage = _currentPage == 1;
 
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (_currentPage > 0)
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (_currentPage > 0)
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color.fromRGBO(76, 194, 201, 1),
+                    width: 1,
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: _previousPage,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  child: const Text(
+                    "Back",
+                    style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                  ),
+                ),
+              ),
+            ),
+          if (_currentPage > 0)
+            const SizedBox(width: 8.0), // Add space between buttons
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  width: 1,
-                ),
+                color: const Color.fromRGBO(76, 194, 201, 1),
               ),
               child: ElevatedButton(
-                onPressed: _previousPage,
+                onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
-                child: const Text(
-                  "Back",
-                  style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                child: Text(
+                  isLastPage ? "Submit" : "Next",
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
           ),
-        if (_currentPage > 0) SizedBox(width: 8.0), // Add space between buttons
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: const Color.fromRGBO(76, 194, 201, 1),
-            ),
-            child: ElevatedButton(
-              onPressed: isLastPage ? _completeForm : _nextPage,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-              ),
-              child: Text(
-                isLastPage ? "Submit" : "Next",
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

@@ -12,6 +12,7 @@ class TextInput extends StatelessWidget {
       required this.focusNode,
       this.nextFocusedNode,
       this.suffixIcon,
+      required this.enabled,
       required void Function(dynamic value) onChanged});
   final bool obsecureText;
   final String text;
@@ -22,37 +23,42 @@ class TextInput extends StatelessWidget {
   final FocusNode? nextFocusedNode;
   final String labelText;
   final Widget? suffixIcon;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: TextField(
-          keyboardType: textInputType,
-          controller: controller,
-          obscureText: obsecureText,
-          focusNode: focusNode,
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              color: Color.fromRGBO(184, 184, 184, 1),
-            ),
-            enabledBorder:  OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-              borderRadius: BorderRadius.circular(8)
-            ),
-            focusedBorder:  OutlineInputBorder(
-                borderSide: BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+        child: Container(
+          height: 55,
+          child: TextField(
+            keyboardType: textInputType,
+            controller: controller,
+            obscureText: obsecureText,
+            focusNode: focusNode,
+            decoration: InputDecoration(
+              labelText: labelText,
+              labelStyle: const TextStyle(
+                color: Color.fromRGBO(184, 184, 184, 1),
+              ),
+              enabledBorder:  OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.white),
                 borderRadius: BorderRadius.circular(8)
-                ),
-            fillColor: Colors.grey.shade100,
-            filled: true,
-            hintText: text,
-            hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
-            prefixIcon: widget,
-            suffixIcon: suffixIcon,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+              ),
+              focusedBorder:  OutlineInputBorder(
+                  borderSide: const BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+                  borderRadius: BorderRadius.circular(8)
+                  ),
+              fillColor: Colors.grey.shade100,
+              filled: true,
+              hintText: text,
+              hintStyle: const TextStyle(color: Color.fromRGBO(184, 184, 184, 1)),
+              prefixIcon: widget,
+              suffixIcon: suffixIcon,
+              enabled: enabled,
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 27.0, horizontal: 12.0),
+            ),
           ),
         ));
   }

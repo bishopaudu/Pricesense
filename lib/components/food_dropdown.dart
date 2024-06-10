@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/model/food_item_model.dart';
+import 'package:pricesense/utils/fetch_food_data.dart';
 import 'package:pricesense/utils/sizes.dart';
 
 class FoodDropdown extends StatefulWidget {
@@ -14,152 +13,238 @@ class FoodDropdown extends StatefulWidget {
 }
 
 class _FoodDropdownState extends State<FoodDropdown> {
-  List<String> foodItems = [
-    'Bag of Rice',
-    'Plate of Pepper',
-    'Bag of Beans',
-    'Tuber Of Yam',
-  ];
-
-  final Map<String, List<String>?> foodBrands = {
-    'Bag of Rice': ['Mama Gold', 'Royal Stallion', 'Caprice'],
-    'Bag of Beans': ['Olutu', 'Plebe', 'White', 'Oloyin'],
-    'Plate of Pepper': ['Rodo', 'Tatase', 'Sombo/Bawa', 'Bell/Sweet', 'Alligator', 'Black', 'White', 'Habanero'],
-    'Tuber Of Yam': ['Water Yam', 'Dry Yam', 'White Guinea Yam'],
-  };
-
-  final Map<String, List<String>?> foodWeights = {
-    'Bag of Rice': ['1 cup', '1 custard bucker', '1 bag'],
-    'Bag of Beans': ['1 cup', '1 custard bucker', '1 bag'],
-    'Plate of Pepper': ['1 cup', '1 Basket', 'A basin'],
-    'Tuber Of Yam': ['Small', 'Medium', 'Large'],
-  };
+  List<FoodItem> foodItems = [];
+  bool isLoading = true;
 
   String? selectedFoodItem;
-  String? selectedSubtype;
   String? selectedBrand;
-  String? selectedWeight;
-  String? customSubtype;
-  TextEditingController priceController = TextEditingController();
-  FocusNode priceFocusNode = FocusNode();
+  String? selectedMeasurement;
+  String? foodid;
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> getData() async {
+    fetchFoodItems().then((items) {
+      setState(() {
+        foodItems = items;
+        isLoading = false;
+      });
+    }).catchError((error) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Error fetching cities: $error");
+      showErrorDialog(error);
+    });
+  }
 
   void _notifyParent() {
     widget.onFoodDataChanged({
       'foodItem': selectedFoodItem ?? '',
-      'subtype': selectedSubtype ?? customSubtype ?? '',
       'brand': selectedBrand ?? '',
-      'weight': selectedWeight ?? '',
-      'price': priceController.text,
+      'measurement': selectedMeasurement ?? '',
+      'foodid': foodid ?? '',
     });
+  }
+
+  void refresh() {
+    setState(() {
+      isLoading = true;
+    });
+    getData();
   }
 
   @override
   Widget build(BuildContext context) {
-    Localizations.localeOf(context);
-    var format = NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+    if (isLoading) {
+      return const Center(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Color.fromRGBO(76, 194, 201, 1),
+              )),
+          SizedBox(
+            width: 10,
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              hint: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Select FoodItems", style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1))),
-                  SizedBox(height: 5),
-                  Text("Food Items", style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1))),
-                ],
-              ),
-              isExpanded: true,
-              value: selectedFoodItem,
-              items: foodItems.map((String foodItem) {
-                return DropdownMenuItem<String>(
-                  value: foodItem,
-                  child: Text(foodItem),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedFoodItem = newValue;
-                  selectedSubtype = null;
-                  selectedBrand = null;
-                  selectedWeight = null;
-                  customSubtype = null;
-                });
-                _notifyParent();
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (selectedFoodItem != null && foodBrands[selectedFoodItem] != null)
-          Column(
+          Text("Loading Food Items")
+        ],
+      ));
+    }
+    return foodItems.isEmpty
+        ? Center(
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              buildBrandDropdown(),
-              const SizedBox(height: 8), // Added space between brand and weight dropdowns
-              buildWeightDropdown(),
+              const Text('No Food Items Available'),
+              TextButton(
+                  onPressed: refresh,
+                  child: const Text("Refresh",
+                      style: TextStyle(
+                          color: Color.fromRGBO(
+                        76,
+                        194,
+                        201,
+                        1,
+                      ))))
+            ],
+          ))
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildFoodItemDropdown(),
+              if (selectedFoodItem != null)
+                Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    buildBrandDropdown(),
+                    const SizedBox(height: 8),
+                    buildMeasurementDropdown(),
+                  ],
+                ),
+            ],
+          );
+  }
+
+  Widget buildFoodItemDropdown() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border:
+            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: const Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Food Items',
+                style: TextStyle(
+                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Text('Select Food Items',
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
             ],
           ),
-        const SizedBox(height: 8),
-        TextInput(
-          textInputType: TextInputType.number,
-          text: "Price",
-          widget: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  format.currencySymbol,
-                  style: const TextStyle(color: Color.fromRGBO(76, 194, 201, 1), fontSize: Sizes.iconSize),
-                ),
-              ],
-            ),
-          ),
-          obsecureText: false,
-          controller: priceController,
-          focusNode: priceFocusNode,
-          onChanged: (value) => _notifyParent(),
-          labelText: 'Price',
+          isExpanded: true,
+          value: selectedFoodItem,
+            iconSize: Sizes.iconSize,
+                icon: selectedFoodItem != null
+                    ? Icon(
+                        Icons.done,
+                        color: Colors.green.shade200,
+                      )
+                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+          items: foodItems.map((FoodItem foodItem) {
+            return DropdownMenuItem<String>(
+              value: foodItem.name,
+              child: Text(foodItem.name),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              selectedFoodItem = newValue;
+              selectedBrand = null;
+              selectedMeasurement = null;
+              foodid = foodItems.firstWhere((item) => item.name == newValue).id;
+            });
+            _notifyParent();
+            print(foodid);
+          },
         ),
-      ],
+      ),
     );
   }
 
   Widget buildBrandDropdown() {
+    List<String> brands =
+        foodItems.firstWhere((item) => item.name == selectedFoodItem).brand;
+    List<String> empty = ['No Brands Availiable'];
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+        border:
+            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           hint: const Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Brand", style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1))),
-              SizedBox(height: 5),
-              Text("Select Brand", style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1))),
+              Text(
+                'Brands/Types',
+                style: TextStyle(
+                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Text('Select Brands/Types',
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
             ],
           ),
           isExpanded: true,
           value: selectedBrand,
-          items: foodBrands[selectedFoodItem]!.map((String brand) {
-            return DropdownMenuItem<String>(
-              value: brand,
-              child: Text(brand),
-            );
-          }).toList(),
+            iconSize: Sizes.iconSize,
+                icon: selectedBrand != null
+                    ? Icon(
+                        Icons.done,
+                        color: Colors.green.shade200,
+                      )
+                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+          items: brands.isEmpty
+              ? empty.map((String brand) {
+                  return DropdownMenuItem<String>(
+                    value: brand,
+                    child: Text(brand),
+                  );
+                }).toList()
+              : brands.map((String brand) {
+                  return DropdownMenuItem<String>(
+                    value: brand,
+                    child: Text(brand),
+                  );
+                }).toList(),
           onChanged: (String? newValue) {
             setState(() {
               selectedBrand = newValue;
@@ -171,35 +256,56 @@ class _FoodDropdownState extends State<FoodDropdown> {
     );
   }
 
-  Widget buildWeightDropdown() {
+  Widget buildMeasurementDropdown() {
+    List<String> measurements = foodItems
+        .firstWhere((item) => item.name == selectedFoodItem)
+        .measurement;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+        border:
+            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           hint: const Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Measurement", style: TextStyle(fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1))),
-              SizedBox(height: 5),
-              Text("Select Measurement", style: TextStyle(fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1))),
+              Text(
+                'Measurement',
+                style: TextStyle(
+                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Text('Select Measurement',
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
             ],
           ),
           isExpanded: true,
-          value: selectedWeight,
-          items: foodWeights[selectedFoodItem]!.map((String weight) {
+          value: selectedMeasurement,
+            iconSize: Sizes.iconSize,
+                icon: selectedMeasurement != null
+                    ? Icon(
+                        Icons.done,
+                        color: Colors.green.shade200,
+                      )
+                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+          items: measurements.map((String measurement) {
             return DropdownMenuItem<String>(
-              value: weight,
-              child: Text(weight),
+              value: measurement,
+              child: Text(measurement),
             );
           }).toList(),
           onChanged: (String? newValue) {
             setState(() {
-              selectedWeight = newValue;
+              selectedMeasurement = newValue;
             });
             _notifyParent();
           },
@@ -208,5 +314,3 @@ class _FoodDropdownState extends State<FoodDropdown> {
     );
   }
 }
-
-

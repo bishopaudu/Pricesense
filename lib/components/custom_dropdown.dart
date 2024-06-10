@@ -17,7 +17,6 @@ class CustomDropdown extends StatefulWidget {
   final String subtitle;
   final ValueChanged<String?> onChanged;
 
-
   @override
   State<CustomDropdown> createState() => _CustomDropdownState();
 }
@@ -40,35 +39,40 @@ class _CustomDropdownState extends State<CustomDropdown> {
               width: 1)),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-            hint: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.maintitle,
+          hint: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.maintitle,
+                style: const TextStyle(
+                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Text(widget.subtitle,
                   style: const TextStyle(
-                      fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
-                ),
-                const SizedBox(height: 5,),
-                Text(widget.subtitle,
-                    style: const TextStyle(
-                        fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
-              ],
-            ),
-            value: widget.value,
-            isExpanded: true,
-            iconSize: Sizes.iconSize,
-            icon: const Icon(
-              Icons.arrow_drop_down,
-              color: Colors.black,
-            ),
-            items: widget.dataList.map(buildItem).toList(),
-            onChanged: (value) {
+                      fontSize: 12, color: Color.fromRGBO(8, 8, 8, 1)))
+            ],
+          ),
+          value: widget.value,
+          isExpanded: true,
+          iconSize: Sizes.iconSize,
+          icon: widget.value != null
+              ? Icon(
+                  Icons.done,
+                  color: Colors.green.shade200,
+                )
+              : Icon(Icons.arrow_drop_down, color: Colors.black),
+          items: widget.dataList.map(buildItem).toList(),
+          onChanged: (value) {
             setState(() {
               widget.value = value;
             });
             widget.onChanged(value);
-          },),
+          },
+        ),
       ),
     );
   }

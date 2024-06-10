@@ -1,78 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/feedbackscreen.dart';
 import 'package:pricesense/utils/sizes.dart';
 import 'package:pricesense/screens/profilescreen.dart';
 
-
-class AgentDetails extends StatefulWidget {
+class AgentDetails extends ConsumerStatefulWidget {
   const AgentDetails({super.key});
 
   @override
-  State<AgentDetails> createState() => _AgentDetailsState();
+  ConsumerState<AgentDetails> createState() => _AgentDetailsState();
 }
 
-class _AgentDetailsState extends State<AgentDetails> {
-  bool value = true;
-
-// Function to open the feedback dialog
-  /*Future<void> openDialogBox(BuildContext context) async {
-    final TextEditingController feedbackController = TextEditingController();
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Send Feedback',
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                const Text('Please enter your feedback below:'),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: feedbackController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white)),
-                      hintText: 'Enter your feedback',
-                      hintStyle:
-                          TextStyle(color: Color.fromRGBO(76, 194, 201, 1))),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                'Cancel',
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                'Submit',
-                style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
-              ),
-              onPressed: () {
-                print('Feedback: ${feedbackController.text}');
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }*/
+class _AgentDetailsState extends ConsumerState<AgentDetails> {
+ // bool value = true;
 
   @override
   Widget build(BuildContext context) {
+    final agentName = ref.watch(userProvider);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -87,81 +32,37 @@ class _AgentDetailsState extends State<AgentDetails> {
                 backgroundImage: AssetImage('lib/assets/user_avatar.png'),
               ),
               const SizedBox(height: 16),
-              const Text(
-                "Kunle Okoro",
-                style: TextStyle(
+               Text(
+                "${agentName!.firstName} ${agentName.lastName}",
+                style: const TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 8),
-              const IntrinsicHeight(
+              IntrinsicHeight(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("kunleokoro@gmail.com",
-                        style: TextStyle(
+                    Text(agentName.email,
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400)),
-                    VerticalDivider(
+                    const VerticalDivider(
                       color: Colors.black,
                       width: 30,
                       thickness: 0.2,
                     ),
                     Text(
-                      "0906772883",
+                      agentName.phone as String,
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                          const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )
                   ],
                 ),
               ),
               const SizedBox(height: 20),
-              GestureDetector(
-                onTap:(){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => ProfileScreen())));
-                },
-                child: _buildInfoCard(
-                  icon: Icons.person_2,
-                  title: "Profile",
-                  children: [
-                    _buildInfoRow(
-                      Icons.logout,
-                      "Logout",
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => FeedbackScreen())));
-                },
-                child: _buildInfoCard(
-                  icon: Icons.contact_support,
-                  title: "Send Feedback",
-                  children: [],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+              Container(
+                 margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -173,31 +74,85 @@ class _AgentDetailsState extends State<AgentDetails> {
             blurRadius: 5,
             offset: const Offset(0, 3),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: const Color.fromRGBO(76, 194, 201, 1),
-                size: Sizes.iconSize,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 16,
+        ],),
+                child: Column(
+                  children:[
+                      GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: ((context) => const ProfileScreen())),
+                  );
+                },
+                child: _buildInfoRow(
+                  Icons.person_2,
+                  "Profile",
                 ),
               ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  // Implement logout functionality here
+                },
+                child: _buildInfoRow(
+                  Icons.logout,
+                  "Logout",
+                ),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: ((context) => FeedbackScreen())),
+                  );
+                },
+                child: _buildInfoRow(
+                  Icons.contact_support,
+                  "Send Feedback",
+                ),
+              ),
+                  ]
+                ),
+              ),
+             /* GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: ((context) => ProfileScreen())),
+                  );
+                },
+                child: _buildInfoRow(
+                  Icons.person_2,
+                  "Profile",
+                ),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  // Implement logout functionality here
+                },
+                child: _buildInfoRow(
+                  Icons.logout,
+                  "Logout",
+                ),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: ((context) => FeedbackScreen())),
+                  );
+                },
+                child: _buildInfoRow(
+                  Icons.contact_support,
+                  "Send Feedback",
+                ),
+              ),*/
             ],
           ),
-          const SizedBox(height: 10),
-          ...children,
-        ],
+        ),
       ),
     );
   }
@@ -205,7 +160,8 @@ class _AgentDetailsState extends State<AgentDetails> {
   Widget _buildInfoRow(IconData icon, String label, [String? trailingText]) {
     return Row(
       children: [
-        Icon(icon, color: const Color.fromRGBO(76, 194, 201, 1)),
+        Icon(icon,
+            size: Sizes.iconSize, color: const Color.fromRGBO(76, 194, 201, 1)),
         const SizedBox(width: 10),
         Text(
           label,

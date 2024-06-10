@@ -12,17 +12,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final TextEditingController searchController = TextEditingController();
   final List<Map<String, String>> surveyHistory = [
     {
-      "title": "Garri",
+      "title": "One Bag of Garri",
       "subtitle": "Ariria Market",
       "date": "2023-05-21"
     },
     {
-      "title": "Rice",
+      "title": "One Bag of Rice",
       "subtitle": "Itam Market",
       "date": "2023-05-20"
     },
     {
-      "title": "Yam",
+      "title": "A Tumber of Yam",
       "subtitle": "Small Market(Uyo)",
       "date": "2023-05-19"
     },
@@ -32,7 +32,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       "date": "2023-05-18"
     },
     {
-      "title": "Beans",
+      "title": "A Basin Beans",
       "subtitle": "West Market",
       "date": "2023-05-17"
     },
@@ -90,7 +90,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10)
+                borderRadius: BorderRadius.circular(8)
               ),
               child: TextFormField(
                 controller: searchController,
@@ -100,16 +100,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderSide: const BorderSide(
                     color: Color.fromRGBO(76, 194, 201, 1),
                   ),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(
                       color: Color.fromRGBO(76, 194, 201, 1),
                     ),
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(8),
                     
                   ),
                   hintText: "Search",
@@ -131,6 +131,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
             ),
+          ),
+          Row(
+            children:[
+              
+            ]
           ),
           Expanded(
             child: ListView.builder(

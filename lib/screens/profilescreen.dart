@@ -1,45 +1,3 @@
-/*import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pricesense/providers/userproviders.dart';
-
-class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
-
-    if (user == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Profile'),
-        ),
-        body: const Center(
-          child: Text('No user data available'),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('ID: ${user.id}'),
-            Text('First Name: ${user.firstName}'),
-            Text('Last Name: ${user.lastName}'),
-            Text('Coordinator: ${user.coordinator}'),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pricesense/providers/userproviders.dart';
@@ -87,12 +45,13 @@ class ProfileScreen extends ConsumerWidget {
         title: const Text('Profile'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+         // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const CircleAvatar(
                     radius: 50,
@@ -107,7 +66,19 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  Column(
+                    //crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                  _buildProfileItem('Coordinator', user.coordinator),
+                  _buildProfileItem('User ID', user.id),
+                  _buildProfileItem('User Email', user.email),
+                    _buildProfileItem('City', user.city),
+                   _buildProfileItem('Phone', user.phone),
+                     _buildProfileItem('Gender', user.gender),
+                    ],
+                  ),
+                  /*Text(
                     'Coordinator: ${user.coordinator}',
                     style: const TextStyle(
                       fontSize: 16,
@@ -122,6 +93,34 @@ class ProfileScreen extends ConsumerWidget {
                       color: Colors.grey,
                     ),
                   ),
+                   Text(
+                    'User ID: ${user.email}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                   Text(
+                    'User ID: ${user.city}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                   Text(
+                    'User ID: ${user.phone}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                   Text(
+                    'User ID: ${user.gender}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),*/
                 ],
               ),
             ),
@@ -148,5 +147,27 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+ Widget _buildProfileItem(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            //overflow: TextOverflow.clip,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(76, 194, 201, 1),
+            ),
+          ),
+          Text(value),
+        ],
+      ),
+    );
+  }
+  
 }
 

@@ -44,6 +44,7 @@ class _DateInputState extends State<DateInput> {
           },
           child: AbsorbPointer(
             child: TextInput(
+              enabled: true,
               textInputType: TextInputType.none,
               text: "Select Date",
               widget: IconButton(

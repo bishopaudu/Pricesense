@@ -1,5 +1,4 @@
 class Data {
-
   static const List<String> collectionType = [
     'Market',
     'Online Market',
@@ -25,7 +24,7 @@ class Data {
     'Market FoodStore'
   ];
   static const List<String> states = [
-     "Ibadan",
+    "Ibadan",
     "Jos",
     "Lagos",
     "Abuja",
@@ -36,7 +35,7 @@ class Data {
   ];
 
   static const List<String> onlineShopData = [
-     "Price Of Rice",
+    "Price Of Rice",
     "Tatase Pepper",
     "Efo Ete",
     "Yam",
@@ -64,5 +63,25 @@ class Data {
     "Lettuce",
     "Pawpaw",
     "Coconut"
-    ];
+  ];
+
+  static const List<Map<String, String>> surveyHistory = [
+    {
+      "title": "One Bag of Garri",
+      "subtitle": "Ariria Market",
+      "date": "2023-05-21"
+    },
+    {
+      "title": "One Bag of Rice",
+      "subtitle": "Itam Market",
+      "date": "2023-05-20"
+    },
+    {
+      "title": "A Tumber of Yam",
+      "subtitle": "Small Market(Uyo)",
+      "date": "2023-05-19"
+    },
+    {"title": "Bag of flour", "subtitle": "Watt Market", "date": "2023-05-18"},
+    {"title": "A Basin Beans", "subtitle": "West Market", "date": "2023-05-17"},
+  ];
 }
