@@ -1,18 +1,22 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/screens/collection_complete.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 
-class Marcoeconomics extends StatefulWidget {
+class Marcoeconomics extends ConsumerStatefulWidget {
   const Marcoeconomics({super.key});
 
   @override
-  State<Marcoeconomics> createState() => _MarcoeconomicsState();
+  ConsumerState<Marcoeconomics> createState() => _MarcoeconomicsState();
 }
 
-class _MarcoeconomicsState extends State<Marcoeconomics> {
+class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool isCompleted = false;
@@ -86,13 +90,27 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
   final FocusNode dateFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
+      final internetStatus = ref.watch(connectivityProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Macroeconomic Data Collection",
-          style:
-              TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+          iconTheme: IconThemeData(
+          color: Colors.white, 
         ),
+        title: Text(
+          internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? "Macroeconomics Collection"
+              : "No Internet Access",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white),
+        ),
+        elevation: 0,
+        backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                internetStatus == ConnectivityResult.wifi
+            ? mainColor
+            : Colors.red.shade400,
+        centerTitle: true,
       ),
       body: isCompleted
           ? const CollectionComplete()
@@ -105,14 +123,14 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                       LinearProgressIndicator(
                         value: (_currentPage + 1) / 1,
                         backgroundColor: Colors.grey.shade200,
-                        color: const Color.fromRGBO(76, 194, 201, 1),
+                        color: mainColor,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         "Step ${_currentPage + 1} of 2",
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Color.fromRGBO(76, 194, 201, 1),
+                          color: mainColor,
                         ),
                       ),
                     ],
@@ -150,7 +168,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             const Text(
               "Summary",
               style: TextStyle(
-                  fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 24, color:mainColor),
             ),
             const SizedBox(height: 16),
             _buildSummaryItem(
@@ -183,7 +201,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             overflow: TextOverflow.clip,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color: mainColor,
             ),
           ),
           Text(value),
@@ -204,7 +222,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
           const Text(
             "Macroeconomics",
             style:
-                TextStyle(fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
+                TextStyle(fontSize: 18, color:  mainColor),
           ),
           const SizedBox(height: 5),
           GestureDetector(
@@ -226,7 +244,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                 widget: const Icon(
                   Icons.event,
                   size: Sizes.iconSize,
-                  color: Color.fromRGBO(76, 194, 201, 1),
+                  color:  mainColor,
                 ),
                 obsecureText: false,
                 controller: dateController,
@@ -248,7 +266,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.currency_exchange,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color:  mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -272,7 +290,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                      color: Color.fromRGBO(76, 194, 201, 1),
+                      color:  mainColor,
                       fontSize: Sizes.iconSize,
                     ),
                   ),
@@ -300,7 +318,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                      color: Color.fromRGBO(76, 194, 201, 1),
+                      color:  mainColor,
                       fontSize: Sizes.iconSize,
                     ),
                   ),
@@ -322,7 +340,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color:  mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -340,7 +358,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color:  mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -358,7 +376,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color:  mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -372,63 +390,6 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
     );
   }
 
-  /*Widget _buildNavigationButtons() {
-    final isLastPage = _currentPage == 1;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (_currentPage > 0)
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color.fromRGBO(76, 194, 201, 1),
-                    width: 1,
-                  ),
-                ),
-                child: ElevatedButton(
-                  onPressed: _previousPage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  ),
-                  child:
-                      const Text("Back", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-            ),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(76, 194, 201, 1),
-                border: Border.all(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  width: 1,
-                ),
-              ),
-              child: ElevatedButton(
-                onPressed: isLastPage ? _completeForm : _nextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                ),
-                child: Text(isLastPage ? "Submit" : "Next",
-                    style: const TextStyle(color: Colors.white)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }*/
   Widget _buildNavigationButtons() {
     final isLastPage = _currentPage == 1;
 
@@ -443,7 +404,7 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color.fromRGBO(76, 194, 201, 1),
+                    color: primaryColor,
                     width: 1,
                   ),
                 ),
@@ -459,23 +420,23 @@ class _MarcoeconomicsState extends State<Marcoeconomics> {
                   ),
                   child: const Text(
                     "Back",
-                    style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                    style: TextStyle(color: primaryColor),
                   ),
                 ),
               ),
             ),
           if (_currentPage > 0)
-            const SizedBox(width: 8.0), // Add space between buttons
+            const SizedBox(width: 8.0),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(76, 194, 201, 1),
+                color:  mainColor,
               ),
               child: ElevatedButton(
                 onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                  backgroundColor:  mainColor,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),

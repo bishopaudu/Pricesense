@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pricesense/screens/login.dart';
+import 'package:pricesense/utils/colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,12 +39,12 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color:mainColor,
               ),
             ),
             SizedBox(height: 20), 
             CircularProgressIndicator(
-              color: Color.fromRGBO(76, 194, 201, 1)
+              color:mainColor
             ),
           ],
         ),

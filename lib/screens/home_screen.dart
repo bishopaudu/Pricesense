@@ -1,26 +1,29 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
+import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pricesense/components/internet_connect.dart';
+import 'package:pricesense/providers/history_provider.dart';
+import 'package:pricesense/providers/survey_count_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/agent_details.dart';
 import 'package:pricesense/screens/category_selection.dart';
 import 'package:pricesense/screens/details.dart';
-import 'package:pricesense/utils/data.dart';
+import 'package:pricesense/screens/localcollections.dart';
+import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/colors.dart';
+import 'package:pricesense/utils/history_notifier.dart';
 import 'package:pricesense/utils/sizes.dart';
 import 'package:pricesense/screens/history_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({
-    super.key,
-  });
+  const HomeScreen({super.key});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -30,10 +33,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String locationState = "";
   String locationCity = "Fetching Location...";
   StreamSubscription<Position>? locationSubscription;
-  final ScrollController _scrollController = ScrollController();
-  bool _isFabVisible = true;
-    Timer? _scrollTimer;
+  StreamSubscription<ConnectivityResult>? connectivitySubscription;
 
+  int pendingSurveyCount = 0;
 
   Future<void> getLocation() async {
     if (await Permission.location.isGranted) {
@@ -44,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         await fetchLocation();
       } else {
         setState(() {
-          locationCity = "Turn on Location Services";
+          locationState = "Turn on Location Services";
         });
       }
     }
@@ -71,47 +73,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  // Grid list
-  final List<Widget> gridItems = [
-    _buildGridItem("20", "Completed"),
-    _buildGridItem("15", "Pending"),
-    _buildGridItem("30", "Report Submitted"),
-    _buildGridItem("20", "Uploaded")
-  ];
-
   static Widget _buildGridItem(String number, String label) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            number,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.teal.shade200,
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              number,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: mainColor,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -120,82 +117,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await fetchLocation();
   }
 
-   @override
-  void dispose() {
-    _scrollController.removeListener(_toggleFabVisibility);
-    _scrollController.dispose();
-    _scrollTimer?.cancel();
-    super.dispose();
-  }
-
   @override
   void initState() {
     super.initState();
     getLocation();
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
       statusBarColor: Colors.transparent,
     ));
-    _scrollController.addListener(_toggleFabVisibility);
-  }
-
-    /*void _toggleFabVisibility() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-      if (_isFabVisible) {
-        setState(() {
-          _isFabVisible = false;
-        });
-      }
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-      if (!_isFabVisible) {
-        setState(() {
-          _isFabVisible = true;
-        });
-      }
-    }
-  }*/
-   void _toggleFabVisibility() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-      if (_isFabVisible) {
-        setState(() {
-          _isFabVisible = false;
-        });
-      }
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-      if (!_isFabVisible) {
-        setState(() {
-          _isFabVisible = true;
-        });
-      }
-    }
-
-    _scrollTimer?.cancel();
-    _scrollTimer = Timer(Duration(milliseconds: 200), () {
-      if (_scrollController.position.userScrollDirection == ScrollDirection.idle) {
-        setState(() {
-          _isFabVisible = true;
-        });
+    connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        ref.read(historyNotifierProvider.notifier).fetchHistory();
       }
     });
   }
 
-
+  // Listen to connectivity changes
+  /*connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        ref.read(historyNotifierProvider.notifier).fetchHistory();
+      }
+    });
+  }*/
 
   @override
   Widget build(BuildContext context) {
+    // final historyAsyncValue = ref.watch(historyProvider);
+    final historyState = ref.watch(historyNotifierProvider);
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
+
+    ref.listen<int>(surveyCountProvider, (previous, next) {
+      setState(() {
+        pendingSurveyCount = next;
+      });
+    });
+    final List<Widget> gridItems = [
+      _buildGridItem("0", "Completed"),
+      _buildGridItem('$pendingSurveyCount', "Pending"),
+      _buildGridItem("0", "Report Submitted"),
+      _buildGridItem("0", "Uploaded")
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "PriceIntel",
-          style: TextStyle(
-              color: Color.fromRGBO(76, 194, 201, 1),
-              fontWeight: FontWeight.w400),
+          style: TextStyle(color: mainColor, fontWeight: FontWeight.w400),
         ),
         backgroundColor: Colors.white,
         elevation: 2,
         leading: IconButton(
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const AgentDetails()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AgentDetails()),
+            );
           },
           icon: const Icon(
             Icons.account_circle,
@@ -203,11 +183,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             size: Sizes.iconSize,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SurveyListScreen()),
+              );
+            },
+            icon: const Icon(
+              Icons.pending_actions,
+              color: Colors.grey,
+              size: Sizes.iconSize,
+            ),
+          ),
+        ],
         centerTitle: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color.fromRGBO(76, 194, 201, 1), Colors.white],
+              colors: [mainColor, Colors.white],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -215,102 +210,133 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      floatingActionButton: AnimatedBuilder(
-        animation:_scrollController,
-        builder: (context,child){
-          return _isFabVisible? FloatingActionButton(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                  child: const Icon(Icons.add),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CategorySelectionScreen()),
-                    );
-                  },
-                ) : Container();
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: mainColor,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CategorySelectionScreen()),
+          );
         },
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: RefreshIndicator(
-          onRefresh:_refreshGrid,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildLocationInfo(ref),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 230, // Set a fixed height for the grid view
-                  child: GridView.builder(
-                    physics:
-                        const NeverScrollableScrollPhysics(), // Disable grid scrolling
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8,
-                      childAspectRatio: 3 / 2,
-                    ),
-                    itemCount: gridItems.length,
-                    itemBuilder: (context, index) {
-                      return gridItems[index];
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          onRefresh: () async {
+            _refreshGrid;
+            await ref.read(historyNotifierProvider.notifier).fetchHistory();
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Recents',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    _buildLocationInfo(ref),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      height: constraints.maxWidth > 600
+                          ? constraints.maxHeight * 0.4
+                          : constraints.maxHeight *
+                              0.4, // Adjust based on screen size
+                      child: GridView.builder(
+                        physics:
+                            const NeverScrollableScrollPhysics(), // Disable grid scrolling
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: constraints.maxWidth > 600 ? 4 : 2,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio:
+                              constraints.maxWidth > 600 ? 1 : 3 / 2,
+                        ),
+                        itemCount: gridItems.length,
+                        itemBuilder: (context, index) {
+                          return gridItems[index];
+                        },
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        // widget.onSeeAllPressed();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HistoryScreen()));
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Recents',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const HistoryScreen()));
+                          },
+                          child: const Text('See All',
+                              style: TextStyle(color: mainColor)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    historyState.when(
+                      data: (historyResponse) {
+                        final historyList =
+                            historyResponse.data.history.take(2).toList();
+
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: historyList.length,
+                          itemBuilder: (context, index) {
+                            final item = historyList[index];
+
+                            return historyList.isEmpty
+                                ? const Center(
+                                    child: Text("No History Avaliable"))
+                                : ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor:mainColor,
+                                      child: Text(
+                                        item.foodItem.name
+                                            .substring(0, 1)
+                                            .toUpperCase(),
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                    title: Text(
+                                        '${Capitalize.capitalizeFirstLetter(item.foodItem.name)} - ${item.brand}'),
+                                    subtitle: Text(item.measurement),
+                                    trailing: Text(
+                                        '${format.currencySymbol}${item.price}'),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              DetailsScreen(historyItem: item),
+                                        ),
+                                      );
+                                    },
+                                  );
+                          },
+                        );
                       },
-                      child: const Text('See All'),
+                      loading: () => const Center(
+                          child: CircularProgressIndicator(color: mainColor)),
+                      error: (error, stack) =>
+                          const Center(child: Text('Failed to load history')),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: Data.surveyHistory.length,
-                  itemBuilder: (context, index) {
-                    final item = Data.surveyHistory[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.teal.shade200,
-                        child: Text(
-                          item['title']!.substring(0, 1),
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      title: Text(item['title']!),
-                      subtitle: Text(item['subtitle']!),
-                      trailing: Text(item['date']!),
-                      onTap: () {
-                        // Handle item tap
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => const Details()));
-                      },
-                    );
-                  },
-                ),
-               
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -319,12 +345,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildLocationInfo(WidgetRef ref) {
     final agentUsername = ref.watch(userProvider);
+    String formattedLocation;
+    if (locationCity.isNotEmpty && locationState.isNotEmpty) {
+      formattedLocation = '$locationCity, $locationState State';
+    } else {
+      formattedLocation =
+          locationCity.isNotEmpty ? locationCity : locationState;
+    }
     return Container(
       height: 120,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: const Color.fromRGBO(76, 193, 201, 1),
+        color: mainColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,18 +372,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const Icon(Icons.place,
                       color: Colors.white, size: Sizes.iconSize),
                   const SizedBox(width: 8),
-                  Text('${locationCity},',
+                  Text(formattedLocation,
                       style:
                           const TextStyle(fontSize: 16, color: Colors.white)),
-                  const SizedBox(width: 3),
-                  Text(locationState,
-                      style: const TextStyle(fontSize: 16, color: Colors.white))
                 ],
               ),
               const SizedBox(width: 8),
               const InternetStatus(),
               const SizedBox(width: 8),
-               Row(children: [
+              Row(children: [
                 const Text("Agent ID:",
                     style: TextStyle(fontSize: 16, color: Colors.white)),
                 const SizedBox(width: 3),

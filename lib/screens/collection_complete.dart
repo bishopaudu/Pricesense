@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pricesense/screens/category_selection.dart';
 import 'package:pricesense/screens/home_screen.dart';
+import 'package:pricesense/utils/colors.dart';
 
 class CollectionComplete extends StatefulWidget {
   const CollectionComplete({super.key});
@@ -101,7 +102,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                   backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                   backgroundColor:mainColor,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                   ),
@@ -114,7 +115,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
                        borderRadius: BorderRadius.circular(8),
                 color:  Colors.white,
                 border: Border.all(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
+                  color:primaryColor,
                   width: 1,
                 ),
                     ),
@@ -130,7 +131,7 @@ class _CollectionCompleteState extends State<CollectionComplete>
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                     ),
-                    child: const Text("Go Home", style: TextStyle(color:Color.fromRGBO(76, 194, 201, 1))),
+                    child: const Text("Go Home", style: TextStyle(color:primaryColor)),
                                     ),
                   ),
               ],

@@ -1,11 +1,15 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/custom_dropdown.dart';
+import 'package:pricesense/components/food_dropdown.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/collection_complete.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/data.dart';
 import 'package:pricesense/utils/sizes.dart';
 
@@ -37,8 +41,12 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
   }
 
   bool _validatePage1() {
-    return onlineMarketValue != null &&
-        onlineMarketValue!.isNotEmpty &&
+    return selectedFoodData['foodItem'] != null &&
+        selectedFoodData['foodItem']!.isNotEmpty &&
+        selectedFoodData['brand'] != null &&
+        selectedFoodData['brand']!.isNotEmpty &&
+        selectedFoodData['measurement'] != null &&
+        selectedFoodData['measurement']!.isNotEmpty &&
         priceController.text.isNotEmpty &&
         dateController.text.isNotEmpty;
   }
@@ -98,13 +106,27 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
   final FocusNode dateFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
+          final internetStatus = ref.watch(connectivityProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Online Shopping Survey Form",
-          style:
-              TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+       appBar: AppBar(
+           iconTheme: IconThemeData(
+          color: Colors.white,
         ),
+        title: Text(
+          internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? "Online Store Collection"
+              : "No Internet Access",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white),
+        ),
+        elevation: 0,
+        backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                internetStatus == ConnectivityResult.wifi
+            ? mainColor
+            : Colors.red.shade400,
+        centerTitle: true,
       ),
       body: isCompleted
           ? const CollectionComplete()
@@ -117,14 +139,14 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
                       LinearProgressIndicator(
                         value: (_currentPage + 1) / 1,
                         backgroundColor: Colors.grey.shade200,
-                        color: const Color.fromRGBO(76, 194, 201, 1),
+                        color: mainColor,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         "Step ${_currentPage + 1} of 2",
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Color.fromRGBO(76, 194, 201, 1),
+                          color: mainColor,
                         ),
                       ),
                     ],
@@ -162,11 +184,15 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
             const Text(
               "Summary",
               style: TextStyle(
-                  fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 24, color: mainColor),
             ),
             const SizedBox(height: 16),
-            _buildSummaryItem("Food Item:", onlineMarketDataValue ?? ""),
-            _buildSummaryItem("Online Store:", onlineMarketValue ?? ""),
+            //_buildSummaryItem("Food Item:", onlineMarketDataValue ?? ""),
+            //_buildSummaryItem("Online Store:", onlineMarketValue ?? ""),
+            _buildSummaryItem("Food Item:", selectedFoodData['foodItem'] ?? ""),
+            _buildSummaryItem("Type:", selectedFoodData['brand'] ?? ""),
+            _buildSummaryItem(
+                "Measurement:", selectedFoodData['measurement'] ?? ""),
             _buildSummaryItem("Price:", priceController.text),
             _buildSummaryItem(
                 "Date:", '${dateTime.year}/${dateTime.month}/${dateTime.day}'),
@@ -187,7 +213,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
             overflow: TextOverflow.clip,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color: mainColor,
             ),
           ),
           Text(value),
@@ -213,7 +239,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
             const Text(
               "Basic Details",
               style: TextStyle(
-                  fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 18,  color: mainColor),
             ),
             const SizedBox(height: 16),
             GestureDetector(
@@ -235,7 +261,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
                   widget: const Icon(
                     Icons.event,
                     size: Sizes.iconSize,
-                    color: Color.fromRGBO(76, 194, 201, 1),
+                     color: mainColor,
                   ),
                   obsecureText: false,
                   controller: dateController,
@@ -255,7 +281,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
               textInputType: TextInputType.name,
               widget: const Icon(
                 Icons.person,
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color:mainColor,
                 size: Sizes.iconSize,
               ),
               onChanged: (value) {},
@@ -274,14 +300,10 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
               },
             ),
             const SizedBox(height: 8),
-            CustomDropdown(
-              dataList: Data.onlineShopData,
-              value: onlineMarketDataValue,
-              maintitle: "Food Item",
-              subtitle: "Select Food Items",
-              onChanged: (value) {
+            FoodDropdown(
+              onFoodDataChanged: (Map<String, String> foodData) {
                 setState(() {
-                  onlineMarketDataValue = value;
+                  selectedFoodData = foodData;
                 });
               },
             ),
@@ -298,7 +320,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
                     Text(
                       format.currencySymbol,
                       style: const TextStyle(
-                          color: Color.fromRGBO(76, 194, 201, 1),
+                          color:  mainColor,
                           fontSize: Sizes.iconSize),
                     ),
                   ],
@@ -316,63 +338,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
     );
   }
 
-  /*Widget _buildNavigationButtons() {
-    final isLastPage = _currentPage == 1;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (_currentPage > 0)
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color.fromRGBO(76, 194, 201, 1),
-                    width: 1,
-                  ),
-                ),
-                child: ElevatedButton(
-                  onPressed: _previousPage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  ),
-                  child:
-                      const Text("Back", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-            ),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(76, 194, 201, 1),
-                border: Border.all(
-                  color: const Color.fromRGBO(76, 194, 201, 1),
-                  width: 1,
-                ),
-              ),
-              child: ElevatedButton(
-                onPressed: isLastPage ? _completeForm : _nextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                ),
-                child: Text(isLastPage ? "Submit" : "Next",
-                    style: const TextStyle(color: Colors.white)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }*/
+ 
   Widget _buildNavigationButtons() {
     final isLastPage = _currentPage == 1;
 
@@ -387,7 +353,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color.fromRGBO(76, 194, 201, 1),
+                    color: mainColor,
                     width: 1,
                   ),
                 ),
@@ -403,7 +369,7 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
                   ),
                   child: const Text(
                     "Back",
-                    style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                    style: TextStyle(color:primaryColor),
                   ),
                 ),
               ),
@@ -414,12 +380,12 @@ class _OnlineStoresState extends ConsumerState<OnlineStores> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(76, 194, 201, 1),
+                color: mainColor,
               ),
               child: ElevatedButton(
                 onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                  backgroundColor: mainColor,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),

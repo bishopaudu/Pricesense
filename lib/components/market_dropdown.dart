@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pricesense/model/markets.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/fetch_market_data.dart';
 import 'package:pricesense/utils/sizes.dart';
 
@@ -80,7 +81,7 @@ class _MarketDropdownState extends State<MarketDropdown> {
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color: mainColor
               )),
           SizedBox(
             width: 10,
@@ -104,12 +105,7 @@ class _MarketDropdownState extends State<MarketDropdown> {
                   onPressed: refresh,
                   child: const Text("Refresh",
                       style: TextStyle(
-                          color: Color.fromRGBO(
-                        76,
-                        194,
-                        201,
-                        1,
-                      ))))
+                         color:mainColor)))
             ],
           ))
         : Container(
@@ -118,12 +114,7 @@ class _MarketDropdownState extends State<MarketDropdown> {
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: const Color.fromRGBO(
-                      76,
-                      194,
-                      201,
-                      1,
-                    ),
+                    color:mainColor,
                     width: 1)),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -135,7 +126,7 @@ class _MarketDropdownState extends State<MarketDropdown> {
                       'Markets',
                       style: TextStyle(
                           fontSize: 12,
-                          color: Color.fromRGBO(184, 184, 184, 1)),
+                          color: mainColor),
                     ),
                     SizedBox(
                       height: 5,
@@ -148,12 +139,7 @@ class _MarketDropdownState extends State<MarketDropdown> {
                 value: selectedMarket,
                 isExpanded: true,
                 iconSize: Sizes.iconSize,
-                icon: selectedMarket != null
-                    ? Icon(
-                        Icons.done,
-                        color: Colors.green.shade200,
-                      )
-                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon:Icon(Icons.arrow_drop_down, color: Colors.black),
                 items: userCity.markets.map((Market market) {
                   return DropdownMenuItem<String>(
                     value: market.id,

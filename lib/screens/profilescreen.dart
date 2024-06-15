@@ -1,39 +1,21 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
+import 'package:pricesense/screens/reset_password.dart';
+import 'package:pricesense/utils/colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  void showResetPasswordDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Reset Password'),
-          content: const Text('Please contact the admin to reset your password.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    final internetStatus = ref.watch(connectivityProvider);
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Profile'),
-        ),
         body: const Center(
           child: Text('No user data available'),
         ),
@@ -42,12 +24,29 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+          iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back button
+        ),
+          title: Text(
+            internetStatus == ConnectivityResult.mobile ||
+                    internetStatus == ConnectivityResult.wifi
+                ? "Profile"
+                : "No Internet Access",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+          elevation: 0,
+          backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? mainColor
+              : Colors.red.shade400,
+          centerTitle: true,
+          
+        ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
-         // crossAxisAlignment: CrossAxisAlignment.start,
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Column(
@@ -55,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   const CircleAvatar(
                     radius: 50,
-                        backgroundImage: AssetImage('lib/assets/user_avatar.png'), 
+                    backgroundImage: AssetImage('lib/assets/user_avatar.png'),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -70,57 +69,15 @@ class ProfileScreen extends ConsumerWidget {
                     //crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                  _buildProfileItem('Coordinator', user.coordinator),
-                  _buildProfileItem('User ID', user.id),
-                  _buildProfileItem('User Email', user.email),
-                    _buildProfileItem('City', user.city),
-                   _buildProfileItem('Phone', user.phone),
-                     _buildProfileItem('Gender', user.gender),
+                      _buildProfileItem('Coordinator', user.coordinator),
+                      _buildProfileItem('User ID', user.username),
+                      _buildProfileItem('User Email', user.email),
+                      _buildProfileItem('City', user.city),
+                      _buildProfileItem('Phone', user.phone),
+                      _buildProfileItem('Gender', user.gender),
+                      _buildProfileItem('Role', user.role),
                     ],
                   ),
-                  /*Text(
-                    'Coordinator: ${user.coordinator}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'User ID: ${user.id}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                   Text(
-                    'User ID: ${user.email}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                   Text(
-                    'User ID: ${user.city}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                   Text(
-                    'User ID: ${user.phone}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                   Text(
-                    'User ID: ${user.gender}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),*/
                 ],
               ),
             ),
@@ -128,12 +85,17 @@ class ProfileScreen extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                backgroundColor:mainColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () => showResetPasswordDialog(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: ((context) => ResetPassword())),
+                );
+              },
               child: const Text(
                 'Reset Password',
                 style: TextStyle(
@@ -147,7 +109,8 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
- Widget _buildProfileItem(String title, String value) {
+
+  Widget _buildProfileItem(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -160,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color:mainColor,
             ),
           ),
           Text(value),
@@ -168,6 +131,4 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
-  
 }
-

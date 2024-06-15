@@ -1,9 +1,14 @@
+// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pricesense/model/food_item_model.dart';
+import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/fetch_food_data.dart';
 import 'package:pricesense/utils/sizes.dart';
 
-class FoodDropdown extends StatefulWidget {
+class FoodDropdown extends ConsumerStatefulWidget {
   final Function(Map<String, String>) onFoodDataChanged;
 
   const FoodDropdown({required this.onFoodDataChanged});
@@ -12,7 +17,7 @@ class FoodDropdown extends StatefulWidget {
   _FoodDropdownState createState() => _FoodDropdownState();
 }
 
-class _FoodDropdownState extends State<FoodDropdown> {
+class _FoodDropdownState extends ConsumerState<FoodDropdown> {
   List<FoodItem> foodItems = [];
   bool isLoading = true;
 
@@ -47,7 +52,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
     );
   }
 
-  Future<void> getData() async {
+ Future<void> getData() async {
     fetchFoodItems().then((items) {
       setState(() {
         foodItems = items;
@@ -61,6 +66,8 @@ class _FoodDropdownState extends State<FoodDropdown> {
       showErrorDialog(error);
     });
   }
+
+ 
 
   void _notifyParent() {
     widget.onFoodDataChanged({
@@ -89,7 +96,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color:mainColor,
               )),
           SizedBox(
             width: 10,
@@ -108,12 +115,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
                   onPressed: refresh,
                   child: const Text("Refresh",
                       style: TextStyle(
-                          color: Color.fromRGBO(
-                        76,
-                        194,
-                        201,
-                        1,
-                      ))))
+                          color: mainColor)))
             ],
           ))
         : Column(
@@ -140,7 +142,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+            Border.all(color: mainColor, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -151,7 +153,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
               Text(
                 'Food Items',
                 style: TextStyle(
-                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    fontSize: 12,  color: mainColor),
               ),
               SizedBox(
                 height: 5,
@@ -164,16 +166,11 @@ class _FoodDropdownState extends State<FoodDropdown> {
           isExpanded: true,
           value: selectedFoodItem,
             iconSize: Sizes.iconSize,
-                icon: selectedFoodItem != null
-                    ? Icon(
-                        Icons.done,
-                        color: Colors.green.shade200,
-                      )
-                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon: Icon(Icons.arrow_drop_down, color: Colors.black),
           items: foodItems.map((FoodItem foodItem) {
             return DropdownMenuItem<String>(
               value: foodItem.name,
-              child: Text(foodItem.name),
+              child: Text(Capitalize. capitalizeFirstLetter(foodItem.name)),
             );
           }).toList(),
           onChanged: (String? newValue) {
@@ -194,7 +191,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
   Widget buildBrandDropdown() {
     List<String> brands =
         foodItems.firstWhere((item) => item.name == selectedFoodItem).brand;
-    List<String> empty = ['No Brands Availiable'];
+    List<String> empty = ['No Brands Available'];
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -202,7 +199,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+            Border.all(color:mainColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -213,7 +210,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
               Text(
                 'Brands/Types',
                 style: TextStyle(
-                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    fontSize: 12, color: mainColor),
               ),
               SizedBox(
                 height: 5,
@@ -226,12 +223,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
           isExpanded: true,
           value: selectedBrand,
             iconSize: Sizes.iconSize,
-                icon: selectedBrand != null
-                    ? Icon(
-                        Icons.done,
-                        color: Colors.green.shade200,
-                      )
-                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon:Icon(Icons.arrow_drop_down, color: Colors.black),
           items: brands.isEmpty
               ? empty.map((String brand) {
                   return DropdownMenuItem<String>(
@@ -267,7 +259,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: const Color.fromRGBO(76, 194, 201, 1), width: 1),
+            Border.all(color:mainColor, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -278,7 +270,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
               Text(
                 'Measurement',
                 style: TextStyle(
-                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    fontSize: 12, color: mainColor),
               ),
               SizedBox(
                 height: 5,
@@ -291,12 +283,7 @@ class _FoodDropdownState extends State<FoodDropdown> {
           isExpanded: true,
           value: selectedMeasurement,
             iconSize: Sizes.iconSize,
-                icon: selectedMeasurement != null
-                    ? Icon(
-                        Icons.done,
-                        color: Colors.green.shade200,
-                      )
-                    : Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon: Icon(Icons.arrow_drop_down, color: Colors.black),
           items: measurements.map((String measurement) {
             return DropdownMenuItem<String>(
               value: measurement,

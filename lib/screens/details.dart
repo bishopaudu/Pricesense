@@ -1,47 +1,65 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pricesense/model/history_model.dart';
+import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/colors.dart';
 
-class Details extends StatefulWidget {
-  const Details({super.key});
-  
+class DetailsScreen extends StatelessWidget {
+  final HistoryItem historyItem;
 
-  @override
-  State<Details> createState() => _DetailsState();
-}
+  const DetailsScreen({super.key, required this.historyItem});
 
-class _DetailsState extends State<Details> {
   @override
   Widget build(BuildContext context) {
+       Localizations.localeOf(context);
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Details'),
+      appBar: AppBar(
+        title: Text(Capitalize.capitalizeFirstLetter(historyItem.foodItem.name),style: const TextStyle(color: Colors.white),),
+        backgroundColor: mainColor,
+        centerTitle: true,
+           iconTheme: const IconThemeData(
+          color: Colors.white, 
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Summary of Survey",
-                  style: TextStyle(
-                      fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSummaryItem('Market:', historyItem.market.name),
+              _buildSummaryItem('Brand/Types', '${Capitalize.capitalizeFirstLetter(historyItem.brand)}'),
+              _buildSummaryItem("Measurement", historyItem.measurement),
+              _buildSummaryItem('Price:', '${format.currencySymbol}${historyItem.price}'),
+              _buildSummaryItem('Price Informant:', '${historyItem.user.firstname} ${historyItem.user.lastname}'),
+             _buildSummaryItem('Distribution Type:',historyItem.distributionType),
+              _buildSummaryItem('Date:',DateFormat('yyyy-MM-dd').format(historyItem.date)),
+                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    backgroundColor:mainColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                  },
+                  child: const Text(
+                    'Remarks',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                _buildSummaryItem("Price Informant Name:", 'James Udo'),
-                _buildSummaryItem("Coordinator:", "Udosen Uko"),
-                _buildSummaryItem("Market:", "Gwarinpa Main Market"),
-                _buildSummaryItem("Distribution Type:", "Retails"),
-                _buildSummaryItem("Food Item:", "Pepper"),
-                _buildSummaryItem("Subtype:", "Olutu"),
-                _buildSummaryItem("Price:", "100"),
-                _buildSummaryItem("Weights", "300g"),
-                _buildSummaryItem("Remarks:", "Fair Price"),
-                _buildSummaryItem("Status:", "Uploaded to Server"),
-              ],
-            ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget _buildSummaryItem(String title, String value) {
@@ -54,7 +72,7 @@ class _DetailsState extends State<Details> {
             title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color: mainColor,
             ),
           ),
           Text(value),
@@ -62,4 +80,6 @@ class _DetailsState extends State<Details> {
       ),
     );
   }
+  
 }
+

@@ -5,16 +5,24 @@ class Data {
     'Macroeconomic Indicator'
   ];
   static const List<String> coordinatorsList = [
-    'Udosen Emma',
-    'Adebayo Femi',
-    'Abubakar Gani'
+    'Prof. Likita Ogba',
+    'Dr. Egunjobi, T. Adenike',
+    'Dr. Oyebamiji Florence Funmilola',
+    'Dr. Justin Amase',
+    'Dr. Mohammed Musa',
+    'Dr. Latifah Musa-Pedro',
+    'Prof. Godly Otto',
+    'Prof. Nicholas Attamah'
   ];
-  static const List<String> market = [
-    'Akpan Andem',
-    'Itam Market',
-    'Ariaria Market',
-    'Shoprite',
-    'Market Square'
+  static const List<String> cities = [
+    'Abuja FCT',
+    'Jos',
+    'Port Harcourt',
+    'Kano',
+    'Maiduguri',
+    'Ibadan',
+    'Lagos',
+    'Enugu'
   ];
   static const List<String> distributionType = ['Wholesale', 'Retail'];
   static const List<String> onlineStores = [
@@ -22,16 +30,6 @@ class Data {
     'Supermart',
     'Shoprite',
     'Market FoodStore'
-  ];
-  static const List<String> states = [
-    "Ibadan",
-    "Jos",
-    "Lagos",
-    "Abuja",
-    "Port Harcout",
-    "Maiduguri",
-    "Kano",
-    "Enugu",
   ];
 
   static const List<String> onlineShopData = [
@@ -81,7 +79,5 @@ class Data {
       "subtitle": "Small Market(Uyo)",
       "date": "2023-05-19"
     },
-    {"title": "Bag of flour", "subtitle": "Watt Market", "date": "2023-05-18"},
-    {"title": "A Basin Beans", "subtitle": "West Market", "date": "2023-05-17"},
   ];
 }

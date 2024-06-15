@@ -1,28 +1,64 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
+import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/collection_screen.dart';
-import 'package:pricesense/screens/online_stores.dart'; 
-import 'package:pricesense/screens/macroeconomics.dart'; 
+import 'package:pricesense/screens/energy_survey_screen.dart';
+import 'package:pricesense/screens/online_stores.dart';
+import 'package:pricesense/screens/macroeconomics.dart';
+import 'package:pricesense/screens/unauthorizedscreen.dart';
+import 'package:pricesense/utils/colors.dart';
 
-class CategorySelectionScreen extends StatelessWidget {
+class CategorySelectionScreen extends ConsumerWidget {
   CategorySelectionScreen({super.key});
-  List<String> categoryTypes = ['Market', 'Online Stores', 'Macroeconomic Indicators'];
+  List<String> categoryTypes = [
+    'Market',
+    'Online Stores',
+    'Macroeconomic Indicators',
+    'Energy Survey'
+  ];
 
-  void navigateToCategoryScreen(BuildContext context, String category) {
+ 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final internetStatus = ref.watch(connectivityProvider);
+     void navigateToCategoryScreen(BuildContext context, String category) {
+    final user = ref.watch(userProvider);
     Widget screen;
     switch (category) {
       case 'Market':
-        screen = const CollectionScreen(); 
+      if (user?.role == 'agent') {
+          screen = const CollectionScreen();
+        } else {
+          screen = const UnauthorizedScreen();
+        }
         break;
       case 'Online Stores':
-        screen = const OnlineStores(); 
+        if (user?.role == 'analyst') {
+          screen = const OnlineStores();
+        } else {
+          screen = const UnauthorizedScreen();
+        }
         break;
       case 'Macroeconomic Indicators':
-        screen = const Marcoeconomics(); 
+        if (user?.role == 'analyst') {
+          screen = const Marcoeconomics();
+        } else {
+          screen = const UnauthorizedScreen();
+        }
+        break;
+        case 'Energy Survey':
+        if (user?.role == 'agent') {
+          screen = const EnergySurveyScreen();
+        } else {
+          screen = const UnauthorizedScreen();
+        }
         break;
       default:
-        screen = const SizedBox(child:Center(child: Text('Text'))); 
+        screen = const SizedBox(child: Center(child: Text('Text')));
     }
     Navigator.push(
       context,
@@ -30,14 +66,20 @@ class CategorySelectionScreen extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Select Collection Type',
-          textAlign:TextAlign.center ,
-          style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+        backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                internetStatus == ConnectivityResult.wifi
+            ? mainColor
+            : Colors.red.shade400,
+        title: Text(
+          internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? "Select Collection Type"
+              : "No Internet Access",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -51,13 +93,14 @@ class CategorySelectionScreen extends StatelessWidget {
             children: [
               for (var types in categoryTypes)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical:8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                      backgroundColor: mainColor,
                       elevation: 5,
-                      minimumSize: const Size.fromHeight(60), // Increased button height
+                      minimumSize:
+                          const Size.fromHeight(60), // Increased button height
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -73,84 +116,3 @@ class CategorySelectionScreen extends StatelessWidget {
     );
   }
 }
-
-
-/*import 'package:flutter/material.dart';
-import 'package:pricesense/screens/collection_screen.dart';
-import 'package:pricesense/screens/online_stores.dart';
-import 'package:pricesense/screens/macroeconomics.dart';
-
-class CategorySelectionScreen extends StatelessWidget {
-  CategorySelectionScreen({super.key});
-  List<String> categoryTypes = ['Market', 'Online Stores', 'Macroeconomic Indicators'];
-
-  void navigateToCategoryScreen(BuildContext context, String category) {
-    Widget screen;
-    switch (category) {
-      case 'Market':
-        screen = const CollectionScreen();
-        break;
-      case 'Online Stores':
-        screen = const OnlineStores();
-        break;
-      case 'Macroeconomic Indicators':
-        screen = const Marcoeconomics();
-        break;
-      default:
-        screen = const SizedBox(child: Center(child: Text('Text')));
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => screen),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Select Collection Type',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
-        ),
-        centerTitle: true, // Center the title
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var types in categoryTypes)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-                      elevation: 5,
-                      minimumSize: const Size.fromHeight(60), // Increased button height
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // Slightly more rounded corners
-                      ),
-                    ),
-                    child: Text(
-                      types,
-                      style: const TextStyle(fontSize: 18), // Increased font size
-                    ),
-                    onPressed: () => navigateToCategoryScreen(context, types),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}*/
-
-
-
-

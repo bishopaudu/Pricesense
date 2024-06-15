@@ -1,88 +1,96 @@
+import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:pricesense/model/history_model.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
+import 'package:pricesense/providers/history_provider.dart';
 import 'package:pricesense/screens/details.dart';
+import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/colors.dart';
+import 'package:pricesense/utils/history_notifier.dart';
 
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+class HistoryScreen extends ConsumerStatefulWidget {
+  const HistoryScreen({Key? key}) : super(key: key);
 
   @override
   _HistoryScreenState createState() => _HistoryScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final TextEditingController searchController = TextEditingController();
-  final List<Map<String, String>> surveyHistory = [
-    {
-      "title": "One Bag of Garri",
-      "subtitle": "Ariria Market",
-      "date": "2023-05-21"
-    },
-    {
-      "title": "One Bag of Rice",
-      "subtitle": "Itam Market",
-      "date": "2023-05-20"
-    },
-    {
-      "title": "A Tumber of Yam",
-      "subtitle": "Small Market(Uyo)",
-      "date": "2023-05-19"
-    },
-    {
-      "title": "Bag of flour",
-      "subtitle": "Watt Market",
-      "date": "2023-05-18"
-    },
-    {
-      "title": "A Basin Beans",
-      "subtitle": "West Market",
-      "date": "2023-05-17"
-    },
-   
-  ];
-
-  late List<Map<String, String>> filteredSurveyHistory;
+  List<HistoryItem> filteredHistoryList = [];
 
   @override
   void initState() {
     super.initState();
-    filteredSurveyHistory = surveyHistory;
+    searchController.addListener(_onSearchChanged);
   }
 
-  void _filterSearchResults(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        filteredSurveyHistory = surveyHistory;
-      });
-      return;
-    }
-    
-
-    List<Map<String, String>> filteredList = surveyHistory
-        .where((survey) =>
-            survey['title']!.toLowerCase().contains(query.toLowerCase()) ||
-            survey['subtitle']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    setState(() {
-      filteredSurveyHistory = filteredList;
-    });
+  @override
+  void dispose() {
+    searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
+    super.dispose();
   }
-  Future<void> refreshPage() async {
 
+  void _onSearchChanged() {
+    _filterSearchResults(searchController.text);
+  }
+
+ void _filterSearchResults(String query) {
+   // final historyAsyncValue = ref.read(historyProvider);
+       final historyState = ref.watch(historyNotifierProvider);
+
+    historyState.when(
+      data: (historyResponse) {
+        final historyList = historyResponse.data.history;
+        if (query.isEmpty) {
+          setState(() {
+            filteredHistoryList = historyList;
+          });
+          return;
+        }
+
+        List<HistoryItem> filteredList = historyList.where((item) {
+          return item.foodItem.name.toLowerCase().contains(query.toLowerCase()) ||
+              item.market.name.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+
+        setState(() {
+          filteredHistoryList = filteredList;
+        });
+      },
+      loading: () => {},
+      error: (error, stack) => {},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+   // final historyAsyncValue = ref.watch(historyProvider);
+       final historyState = ref.watch(historyNotifierProvider);
+
+    final internetStatus = ref.watch(connectivityProvider);
+    var format = NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("History"),
+        title: Text(
+          internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? "History"
+              : "No Internet Access",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white),
+        ),
         elevation: 0,
-        backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
-       /* actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert_rounded),
-          ),
-        ],*/
+        backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                internetStatus == ConnectivityResult.wifi
+            ? mainColor
+            : Colors.red.shade400,
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -90,32 +98,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8)
+                borderRadius: BorderRadius.circular(8),
               ),
               child: TextFormField(
                 controller: searchController,
-                onChanged: _filterSearchResults,
                 decoration: InputDecoration(
-                   focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(
-                    color: Color.fromRGBO(76, 194, 201, 1),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: mainColor,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(
-                      color: Color.fromRGBO(76, 194, 201, 1),
+                      color: mainColor,
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    
                   ),
                   hintText: "Search",
                   prefixIcon: const Icon(
                     Icons.search,
-                    color: Color.fromRGBO(76, 194, 201, 1),
+                    color: mainColor,
                   ),
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -124,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     },
                     icon: const Icon(
                       Icons.cancel,
-                      color: Color.fromRGBO(76, 194, 201, 1),
+                      color: mainColor,
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -132,33 +138,54 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
           ),
-          Row(
-            children:[
-              
-            ]
-          ),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredSurveyHistory.length,
-              itemBuilder: (context, index) {
-                final item = filteredSurveyHistory[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.teal.shade200,
-                    child: Text(
-                      item['title']!.substring(0, 1),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  title: Text(item['title']!),
-                  subtitle: Text(item['subtitle']!),
-                  trailing: Text(item['date']!),
-                  onTap: () {
-                    // Handle item tap
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Details()));
+            child: historyState.when(
+              data: (historyResponse) {
+                final historyList = filteredHistoryList.isEmpty
+                    ? historyResponse.data.history
+                    : filteredHistoryList;
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.refresh(historyProvider);
                   },
+                  child: ListView.builder(
+                    itemCount: historyList.length,
+                    itemBuilder: (context, index) {
+                      final item = historyList[index];
+
+                      return ListTile(
+                        title: Text('${Capitalize.capitalizeFirstLetter(item.foodItem.name)} - ${item.brand}'),
+                        subtitle: Text(item.measurement),
+                        trailing: Text('${format.currencySymbol}${item.price}'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailsScreen(historyItem: item),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator(color: mainColor)),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Failed to load history'),
+                    TextButton(
+                      onPressed: () {
+                        ref.refresh(historyProvider);
+                      },
+                      child: Text("Refresh", style: TextStyle(color: mainColor)),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -166,3 +193,4 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 }
+

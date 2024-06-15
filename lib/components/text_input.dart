@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pricesense/utils/colors.dart';
 
 class TextInput extends StatelessWidget {
   const TextInput(
@@ -46,7 +47,7 @@ class TextInput extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8)
               ),
               focusedBorder:  OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color.fromRGBO(76, 194, 201, 1)),
+                  borderSide: const BorderSide(color: mainColor),
                   borderRadius: BorderRadius.circular(8)
                   ),
               fillColor: Colors.grey.shade100,

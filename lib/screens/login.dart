@@ -6,9 +6,11 @@ import 'package:pricesense/model/user_model.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/first_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:pricesense/utils/auth_service.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 
-class Login extends ConsumerStatefulWidget{
+class Login extends ConsumerStatefulWidget {
   const Login({super.key});
 
   @override
@@ -26,7 +28,7 @@ class _LoginState extends ConsumerState<Login> {
   bool visible = false;
 
   void navigate() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const FirstScreen()),
     );
@@ -108,21 +110,35 @@ class _LoginState extends ConsumerState<Login> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (responseData.containsKey('token')) {
-            final user = UserData.fromJson(responseData);
+          final user = UserData.fromJson(responseData);
           ref.read(userProvider.notifier).setUser(user);
+          final authService = AuthService();
+          await authService.saveUserData(
+          responseData["token"],
+          responseData["firstname"],
+          responseData["lastname"],
+          responseData["email"],
+          responseData["phone"],
+          responseData["city"],
+          responseData["_id"],
+          responseData["coordinator"],
+          responseData["gender"],
+          responseData["username"],
+          responseData["role"]
+
+            );
+          usernameController.clear();
+          passwordController.clear();
           navigate();
         } else {
-          //showErrorDialog(responseData['message'] ?? 'Login failed');
           showErrorDialog(response.body);
         }
       } else {
-        //showErrorDialog('Login failed. Please try again.');
         showErrorDialog(response.body);
       }
     } catch (response) {
       print('Error: $response');
-        showErrorDialog('An error occurred. ${response}');
-      //showErrorDialog('E work not');
+      showErrorDialog('An error occurred. ${response}');
     } finally {
       setState(() {
         isLoading = false;
@@ -130,13 +146,7 @@ class _LoginState extends ConsumerState<Login> {
     }
   }
 
- /* void cancelLogin() {
-    setState(() {
-      isLoading = false;
-      tries++;
-    });
-    print(tries);
-  }*/
+
 
   void switchVisible() {
     setState(() {
@@ -158,7 +168,7 @@ class _LoginState extends ConsumerState<Login> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(76, 194, 201, 1),
+                  color:mainColor,
                 ),
               ),
               const SizedBox(height: 40),
@@ -172,7 +182,7 @@ class _LoginState extends ConsumerState<Login> {
                 textInputType: TextInputType.name,
                 widget: const Icon(Icons.verified_user,
                     size: Sizes.iconSize,
-                    color: Color.fromRGBO(76, 194, 201, 1)),
+                    color:mainColor),
                 onChanged: (value) {},
                 labelText: "Username",
               ),
@@ -184,7 +194,7 @@ class _LoginState extends ConsumerState<Login> {
                     icon: Icon(
                       visible ? Icons.visibility : Icons.visibility_off,
                       size: Sizes.iconSize,
-                      color: const Color.fromRGBO(76, 194, 201, 1),
+                      color:mainColor,
                     )),
                 focusNode: passwordFocusNode,
                 text: "Password",
@@ -192,7 +202,7 @@ class _LoginState extends ConsumerState<Login> {
                 controller: passwordController,
                 textInputType: TextInputType.visiblePassword,
                 widget: const Icon(Icons.password,
-                    color: Color.fromRGBO(76, 194, 201, 1)),
+                    color: mainColor),
                 onChanged: (value) {},
                 labelText: "Password",
               ),
@@ -209,9 +219,8 @@ class _LoginState extends ConsumerState<Login> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          backgroundColor:
-                              const Color.fromRGBO(76, 194, 201, 1),
-                          shadowColor: const Color.fromRGBO(76, 194, 201, 1),
+                          backgroundColor:mainColor,
+                          shadowColor: mainColor,
                           elevation: 5,
                         ),
                         onPressed: isLoading ? null : login,
@@ -248,4 +257,3 @@ class _LoginState extends ConsumerState<Login> {
     );
   }
 }
-

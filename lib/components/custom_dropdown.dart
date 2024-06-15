@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 
 class CustomDropdown extends StatefulWidget {
@@ -30,12 +31,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-              color: const Color.fromRGBO(
-                76,
-                194,
-                201,
-                1,
-              ),
+              color: mainColor,
               width: 1)),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -46,7 +42,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
               Text(
                 widget.maintitle,
                 style: const TextStyle(
-                    fontSize: 12, color: Color.fromRGBO(184, 184, 184, 1)),
+                    fontSize: 12,  color: mainColor),
               ),
               const SizedBox(
                 height: 5,
@@ -59,12 +55,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
           value: widget.value,
           isExpanded: true,
           iconSize: Sizes.iconSize,
-          icon: widget.value != null
-              ? Icon(
-                  Icons.done,
-                  color: Colors.green.shade200,
-                )
-              : Icon(Icons.arrow_drop_down, color: Colors.black),
+          icon:Icon(Icons.arrow_drop_down, color: Colors.black),
           items: widget.dataList.map(buildItem).toList(),
           onChanged: (value) {
             setState(() {

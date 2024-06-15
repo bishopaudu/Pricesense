@@ -10,6 +10,20 @@ class Market {
       name: json['name'] ?? '',
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+
+  factory Market.fromMap(Map<String, dynamic> map) {
+    return Market(
+      id: map['id'],
+      name: map['name'],
+    );
+  }
 }
 
 class City {
@@ -28,5 +42,12 @@ class City {
       name: json['name'] ?? '',
       markets: markets,
     );
+  }
+    Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'markets': markets.map((market) => market.toMap()).toList(),
+    };
   }
 }

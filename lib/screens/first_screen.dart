@@ -4,6 +4,7 @@ import 'package:pricesense/screens/agent_details.dart';
 import 'package:pricesense/screens/category_selection.dart';
 import 'package:pricesense/screens/history_screen.dart';
 import 'package:pricesense/screens/home_screen.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 
 class FirstScreen extends StatefulWidget {
@@ -70,6 +71,7 @@ class _FirstScreenState extends State<FirstScreen> {
                 onGenerateRoute: (routeSettings) {
                   return MaterialPageRoute(
                     builder: (context) => page,
+                    settings: routeSettings,
                   );
                 },
               ),
@@ -81,7 +83,7 @@ class _FirstScreenState extends State<FirstScreen> {
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _selectedIndex,
-          selectedItemColor: const Color.fromRGBO(76, 193, 201, 1),
+          selectedItemColor: primaryColor,
           unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
@@ -107,4 +109,7 @@ class _FirstScreenState extends State<FirstScreen> {
     );
   }
 }
+
+
+
 

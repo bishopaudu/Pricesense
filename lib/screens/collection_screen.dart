@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, avoid_print, unnecessary_brace_in_string_interps
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,9 +8,15 @@ import 'package:pricesense/components/custom_dropdown.dart';
 import 'package:pricesense/components/food_dropdown.dart';
 import 'package:pricesense/components/market_dropdown.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/model/food_item_dbmodel.dart';
+import 'package:pricesense/providers/connectivity_provider.dart';
+import 'package:pricesense/providers/survey_count_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/collection_complete.dart';
+import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/data.dart';
+import 'package:pricesense/utils/database_service.dart';
 import 'package:pricesense/utils/sizes.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -53,7 +60,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   String? collectionType;
   String? cityValue;
   String? city;
-  String? _filePath;
   DateTime dateTime = DateTime.now();
   bool dateText = false;
   String submitText = 'Submitting';
@@ -114,13 +120,13 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         return AlertDialog(
           //title: const Text('Error'),
           content: Container(
-            height: 30,
+            height: 40,
             width: 35,
             child: Center(
                 child: Text(
-                  message,
-                  style: const TextStyle(fontSize: 16),
-                )),
+              message,
+              style: const TextStyle(fontSize: 16),
+            )),
           ),
           actions: <Widget>[
             TextButton(
@@ -135,8 +141,17 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     );
   }
 
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> _completeForm() async {
+    final db = DatabaseHelper();
     final user = ref.watch(userProvider);
+    //final surveyCount = ref.read(surveyCountProvider.notifier);
+    final connectivityResult = ref.watch(connectivityProvider);
     setState(() {
       submitText = 'Submitting';
       uploading = true;
@@ -153,31 +168,61 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         'user': '${user!.id}',
         'price': int.parse(priceController.text),
         'location': '${user.city}',
+        'taxes':int.parse(taxandLeviesController.text),
+        'rent':int.parse(shoprentController.text)
       };
 
-      // Make the POST request
-      final response = await http.post(
-        Uri.parse('https://priceintel.vercel.app/data/new'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${user.token}',
-        },
-        body: json.encode(data),
-      );
-    
-      if (response.statusCode == 200) {
-        setState(() {
-          submitText = 'Submitted';
-          isCompleted = true;
+      if (connectivityResult == ConnectivityResult.mobile ||
+          connectivityResult == ConnectivityResult.wifi) {
+        // Make the POST request
+        final response = await http.post(
+          Uri.parse('https://priceintel.vercel.app/data/new'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${user.token}',
+          },
+          body: json.encode(data),
+        );
+        if (response.statusCode == 200) {
+          setState(() {
+            submitText = 'Submitted';
+            isCompleted = true;
+            uploading = false;
+          });
+           showSnackBar('Successfully Uploaded To Server');
+          print(response.body);
+        } else {
+          showSnackBar('Error uploading');
           uploading = false;
-        });
-        print(response.body);
+          print(response.body);
+          print(response.statusCode);
+        }
       } else {
-        showErrorDialog('Error uploading');
-        print(response.body);
-        print(response.statusCode);
+        final localSurvey = FoodItemDbModel(
+          marketid: marketValue ?? "",
+          foodId: selectedFoodData['foodid']!,
+          distributionType: distributionTypeValue ?? "",
+          brand: selectedFoodData['brand']!,
+          measurement: selectedFoodData['measurement']!,
+          userId: user.id,
+          price: int.parse(priceController.text),
+          location: user.city,
+          foodname: selectedFoodData['foodItem']!,
+          shoprent: int.parse(shoprentController.text),
+          taxandLevies: int.parse(taxandLeviesController.text)
+        );
+        await db.insertSurvey(localSurvey);
+        ref.read(surveyCountProvider.notifier).refreshSurveyCount();
+        setState(() {
+          uploading = false;
+          isCompleted = true;
+        });
+
+        //showErrorDialog('Not Connected To Server.Saved Locally');
+        showSnackBar("Not Connected To Server.Saved Locally");
       }
     } catch (e) {
+      print(e);
       showErrorDialog('error ${e}');
     }
   }
@@ -205,14 +250,24 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final internetStatus = ref.watch(connectivityProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Collection",
-          style:
-              TextStyle(fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+          iconTheme: const IconThemeData(
+          color: Colors.white, 
         ),
-      ),
+         backgroundColor: internetStatus == ConnectivityResult.mobile ||
+                internetStatus == ConnectivityResult.wifi
+            ? mainColor
+            : Colors.red.shade400,
+        title: Text(
+          internetStatus == ConnectivityResult.mobile ||
+                  internetStatus == ConnectivityResult.wifi
+              ? "Collection"
+              : "No Internet Acess",style:const TextStyle(color: Colors.white)),
+              centerTitle: true,
+              ),
+      
       body: isCompleted
           ? const CollectionComplete()
           : Column(
@@ -224,14 +279,14 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                       LinearProgressIndicator(
                         value: (_currentPage + 1) / 3,
                         backgroundColor: Colors.grey.shade200,
-                        color: const Color.fromRGBO(76, 194, 201, 1),
+                        color: mainColor,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         "Step ${_currentPage + 1} of 3",
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Color.fromRGBO(76, 194, 201, 1),
+                          color: mainColor,
                         ),
                       ),
                     ],
@@ -278,7 +333,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             const Text(
               "Basic Details",
               style: TextStyle(
-                  fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 18, color:mainColor),
             ),
             const SizedBox(height: 16),
             TextInput(
@@ -290,7 +345,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               textInputType: TextInputType.name,
               widget: const Icon(
                 Icons.person,
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color: mainColor,
                 size: Sizes.iconSize,
               ),
               onChanged: (value) {},
@@ -306,7 +361,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               textInputType: TextInputType.name,
               widget: const Icon(
                 Icons.supervisor_account,
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color:  mainColor,
                 size: Sizes.iconSize,
               ),
               onChanged: (value) {},
@@ -322,7 +377,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               textInputType: TextInputType.name,
               widget: const Icon(
                 Icons.location_city,
-                color: Color.fromRGBO(76, 194, 201, 1),
+                color:  mainColor,
                 size: Sizes.iconSize,
               ),
               onChanged: (value) {},
@@ -359,7 +414,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             const Text(
               "Food Item",
               style: TextStyle(
-                  fontSize: 18, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 18, color: mainColor),
             ),
             const SizedBox(height: 10),
             const SizedBox(
@@ -401,7 +456,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     Text(
                       format.currencySymbol,
                       style: const TextStyle(
-                          color: Color.fromRGBO(76, 194, 201, 1),
+                          color:  mainColor,
                           fontSize: Sizes.iconSize),
                     ),
                   ],
@@ -437,7 +492,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                       widget: const Icon(
                         Icons.event,
                         size: Sizes.iconSize,
-                        color: Color.fromRGBO(76, 194, 201, 1),
+                        color:  mainColor,
                       ),
                       obsecureText: false,
                       controller: dateController,
@@ -463,7 +518,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                           Text(
                             format.currencySymbol,
                             style: const TextStyle(
-                              color: Color.fromRGBO(76, 194, 201, 1),
+                              color:  mainColor,
                               fontSize: Sizes.iconSize,
                             ),
                           ),
@@ -473,10 +528,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     obsecureText: false,
                     controller: taxandLeviesController,
                     focusNode: taxandLeviesFocusNode,
-                    suffixIcon: taxandLeviesController.text.isNotEmpty ?  Icon(
-                        Icons.done,
-                        color: Colors.green.shade200,
-                      ) : Container(),
                     onChanged: (value) {}),
                 const SizedBox(
                   height: 8,
@@ -494,7 +545,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                           Text(
                             format.currencySymbol,
                             style: const TextStyle(
-                              color: Color.fromRGBO(76, 194, 201, 1),
+                              color:  mainColor,
                               fontSize: Sizes.iconSize,
                             ),
                           ),
@@ -504,7 +555,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     obsecureText: false,
                     controller: shoprentController,
                     focusNode: shoprentFocusNode,
-                    onChanged: (value) {})
+                    onChanged: (value) {}),
+                const SizedBox(
+                  height: 8,
+                ),
+              
               ],
             ),
           ],
@@ -524,7 +579,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             const Text(
               "Summary",
               style: TextStyle(
-                  fontSize: 24, color: Color.fromRGBO(76, 194, 201, 1)),
+                  fontSize: 24, color:mainColor),
             ),
             const SizedBox(height: 16),
             _buildSummaryItem(
@@ -541,8 +596,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             _buildSummaryItem("Price:", priceController.text),
             _buildSummaryItem("Shop Rent:", shoprentController.text),
             _buildSummaryItem("Tax/Levies", taxandLeviesController.text),
-            _buildSummaryItem("Image:",
-                _filePath != null ? 'Image Present' : 'No Image Availiable'),
             _buildSummaryItem("Date Submitted:",
                 '${dateTime.year}/${dateTime.month}/${dateTime.day}'),
           ],
@@ -551,7 +604,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     );
   }
 
-  Widget _buildSummaryItem(String title, String value) {
+  Widget _buildSummaryItem(String title, String? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -562,10 +615,10 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             overflow: TextOverflow.clip,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(76, 194, 201, 1),
+              color: mainColor,
             ),
           ),
-          Text(value),
+          Text(value!),
         ],
       ),
     );
@@ -585,7 +638,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color.fromRGBO(76, 194, 201, 1),
+                    color: primaryColor,
                     width: 1,
                   ),
                 ),
@@ -601,7 +654,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   ),
                   child: const Text(
                     "Back",
-                    style: TextStyle(color: Color.fromRGBO(76, 194, 201, 1)),
+                    style: TextStyle(color:mainColor),
                   ),
                 ),
               ),
@@ -611,12 +664,12 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: const Color.fromRGBO(76, 194, 201, 1),
+                color:  mainColor,
               ),
               child: ElevatedButton(
                 onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(76, 194, 201, 1),
+                  backgroundColor: mainColor,
                   elevation: 5,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
