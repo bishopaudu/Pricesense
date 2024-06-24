@@ -1,13 +1,21 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pricesense/components/text_input.dart';
+import 'package:pricesense/model/macroeconomics_model.dart';
 import 'package:pricesense/providers/connectivity_provider.dart';
+import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/collection_complete.dart';
 import 'package:pricesense/utils/colors.dart';
+import 'package:pricesense/utils/database_service.dart';
+import 'package:pricesense/utils/error_dialog.dart';
+import 'package:pricesense/utils/grid_data_service.dart';
 import 'package:pricesense/utils/sizes.dart';
+import 'package:http/http.dart' as http;
+import 'package:pricesense/utils/analyst_history_notifier.dart';
 
 class Marcoeconomics extends ConsumerStatefulWidget {
   const Marcoeconomics({super.key});
@@ -20,12 +28,94 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool isCompleted = false;
-  void _completeForm() {
-    setState(() {
-      isCompleted = true;
-    });
+  bool uploading = false;
+  String submitText = 'Submit';
+
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
+ Future<void> _completeForm() async {
+  final user = ref.watch(userProvider);
+  final connectivityResult = ref.watch(connectivityProvider);
+  setState(() {
+    submitText = 'Submitting';
+    uploading = true;
+  });
+
+  try {
+    int parseValue(String value) {
+      try {
+        return int.parse(value);
+      } catch (e) {
+        print('Error parsing value: $value');
+        return 0;
+      }
+    }
+
+    final data = MacroeconomicsModel(
+      officialUsdExchangeRate: parseValue(FXController.text),
+      monetaryPolicyRate: parseValue(mprController.text),
+      minimumDiscountRate: parseValue(mrrController.text),
+      interbankCallRate: parseValue(interbankController.text),
+      treasuryBillRate: parseValue(treasuryBillController.text),
+      savingsDepositRate: parseValue(savingdepositrateController.text),
+      primeLendingRate: parseValue(primelendingrateController.text),
+      marketCapitalization: parseValue(marketCapController.text),
+      allShareIndex: parseValue(allShareIndexController.text),
+      turnOverRatio: parseValue(turnoverController.text),
+      valueShareTraded: parseValue(valuesharetradedController.text),
+      totalListingStocks: parseValue(totallistingstockController.text),
+    );
+
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      final response = await http.post(
+        Uri.parse('https://priceintel.vercel.app/data/macroeconomics/new'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${user!.token}',
+        },
+        body: json.encode(data.toMap()),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          submitText = 'Submitted';
+          isCompleted = true;
+          uploading = false;
+        });
+        ref.refresh(analystHistoryNotifierProvider);
+         ref.invalidate(gridDataProvider);
+        showSnackBar('Successfully uploaded to server');
+        print(response.body);
+      } else {
+        showSnackBar('Error uploading');
+        setState(() {
+          uploading = false;
+        });
+        print(response.body);
+        print(response.statusCode);
+      }
+    } else {
+      await DatabaseHelper().insertMacroeconomics(data);
+      showSnackBar("Not connected to server.Saved locally");
+      setState(() {
+        uploading = false;
+        isCompleted = true;
+      });
+    }
+  } catch (e) {
+    print(e);
+    setState(() {
+      uploading = false;
+      submitText = "Submit";
+    });
+    showErrorDialog('error $e', context);
+  }
+}
 
   bool _validatePage1() {
     return dateController.text.isNotEmpty &&
@@ -33,9 +123,18 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
         energyController.text.isNotEmpty &&
         deiselController.text.isNotEmpty &&
         mrrController.text.isNotEmpty &&
-        interbankController.text.isNotEmpty;
+        interbankController.text.isNotEmpty&&
+    treasuryBillController.text.isNotEmpty &&
+        savingdepositrateController.text.isNotEmpty &&
+        primelendingrateController.text.isNotEmpty &&
+        marketCapController.text.isNotEmpty &&
+        allShareIndexController.text.isNotEmpty &&
+        turnoverController.text.isNotEmpty &&
+        valuesharetradedController.text.isNotEmpty &&
+        totallistingstockController.text.isNotEmpty;
   }
-   void _nextPage() {
+
+  void _nextPage() {
     bool canNavigate = false;
     if (_currentPage == 0) {
       canNavigate = _validatePage1();
@@ -77,12 +176,29 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
   TextEditingController deiselController = TextEditingController();
   TextEditingController mrrController = TextEditingController();
   TextEditingController interbankController = TextEditingController();
+  TextEditingController treasuryBillController = TextEditingController();
+  TextEditingController savingdepositrateController = TextEditingController();
+  TextEditingController primelendingrateController = TextEditingController();
+  TextEditingController marketCapController = TextEditingController();
+  TextEditingController allShareIndexController = TextEditingController();
+  TextEditingController turnoverController = TextEditingController();
+  TextEditingController valuesharetradedController = TextEditingController();
+  TextEditingController totallistingstockController = TextEditingController();
+
   final FocusNode FXFocusNode = FocusNode();
   final FocusNode energyFocusNode = FocusNode();
   final FocusNode mprFocusNode = FocusNode();
   final FocusNode deiselFocusNode = FocusNode();
   final FocusNode mrrFocusNode = FocusNode();
   final FocusNode interbankFocusNode = FocusNode();
+  final FocusNode treasuryBillFocusNode = FocusNode();
+  final FocusNode savingdepositrateFocusNode = FocusNode();
+  final FocusNode primelendingrateFocusNode = FocusNode();
+  final FocusNode marketCapFocusNode = FocusNode();
+  final FocusNode allShareIndexFocusNode = FocusNode();
+  final FocusNode turnoverFocusNode = FocusNode();
+  final FocusNode valuesharetradedFocusNode = FocusNode();
+  final FocusNode totallistingstockFocusNode = FocusNode();
 
   Future<DateTime?> selectDate() => showDatePicker(
       context: context, firstDate: DateTime(2000), lastDate: DateTime(2100));
@@ -90,20 +206,20 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
   final FocusNode dateFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
-      final internetStatus = ref.watch(connectivityProvider);
+    final internetStatus = ref.watch(connectivityProvider);
 
     return Scaffold(
       appBar: AppBar(
-          iconTheme: IconThemeData(
-          color: Colors.white, 
+        iconTheme: const IconThemeData(
+          color: Colors.white,
         ),
         title: Text(
           internetStatus == ConnectivityResult.mobile ||
                   internetStatus == ConnectivityResult.wifi
-              ? "Macroeconomics Collection"
+              ? 'Macroeconomic Variables'
               : "No Internet Access",
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: internetStatus == ConnectivityResult.mobile ||
@@ -167,8 +283,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
           children: [
             const Text(
               "Summary",
-              style: TextStyle(
-                  fontSize: 24, color:mainColor),
+              style: TextStyle(fontSize: 24, color: mainColor),
             ),
             const SizedBox(height: 16),
             _buildSummaryItem(
@@ -184,6 +299,22 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             _buildSummaryItem("Inter-Bank Call Rate", interbankController.text),
             _buildSummaryItem("Energy Cost (daily) - 1 Litre of Diesel",
                 deiselController.text),
+                _buildSummaryItem("Saving Deposit Rate",
+                savingdepositrateController.text),
+                _buildSummaryItem("Treasury Bill",
+                treasuryBillController.text),
+                 _buildSummaryItem("Prime Lending Rate",
+                primelendingrateController.text),
+                _buildSummaryItem("Market Capitalization",
+                 marketCapController.text),
+                  _buildSummaryItem("Turn Over",
+                 turnoverController.text),
+                 _buildSummaryItem("All Share Index",
+                 allShareIndexController.text),
+                 _buildSummaryItem("Value Share Traded",
+                 valuesharetradedController.text),
+                 _buildSummaryItem("Total Listing Stock",
+                 totallistingstockController.text),
           ],
         ),
       ),
@@ -221,8 +352,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Text(
             "Macroeconomics",
-            style:
-                TextStyle(fontSize: 18, color:  mainColor),
+            style: TextStyle(fontSize: 18, color: mainColor),
           ),
           const SizedBox(height: 5),
           GestureDetector(
@@ -244,7 +374,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
                 widget: const Icon(
                   Icons.event,
                   size: Sizes.iconSize,
-                  color:  mainColor,
+                  color: mainColor,
                 ),
                 obsecureText: false,
                 controller: dateController,
@@ -266,7 +396,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.currency_exchange,
-              color:  mainColor,
+              color: mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -290,7 +420,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                      color:  mainColor,
+                      color: mainColor,
                       fontSize: Sizes.iconSize,
                     ),
                   ),
@@ -300,7 +430,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             onChanged: (value) {},
             labelText: '1 Litre of Petrol',
           ),
-           const SizedBox(
+          const SizedBox(
             height: 8,
           ),
           TextInput(
@@ -318,7 +448,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
                   Text(
                     format.currencySymbol,
                     style: const TextStyle(
-                      color:  mainColor,
+                      color: mainColor,
                       fontSize: Sizes.iconSize,
                     ),
                   ),
@@ -340,7 +470,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color:  mainColor,
+              color: mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -358,7 +488,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color:  mainColor,
+              color: mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -376,7 +506,7 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
             textInputType: TextInputType.number,
             widget: const Icon(
               Icons.numbers,
-              color:  mainColor,
+              color: mainColor,
               size: Sizes.iconSize,
             ),
             onChanged: (value) {},
@@ -384,6 +514,147 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
           ),
           const SizedBox(
             height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: primelendingrateFocusNode,
+            text: "Prime Lending Rate",
+            obsecureText: false,
+            controller: primelendingrateController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Prime Lending Rate",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: allShareIndexFocusNode,
+            text: "All Share Index",
+            obsecureText: false,
+            controller: allShareIndexController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "All Share Index",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: marketCapFocusNode,
+            text: "Market Capitalization",
+            obsecureText: false,
+            controller: marketCapController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Market Capitalization",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+           TextInput(
+            enabled: true,
+            focusNode:valuesharetradedFocusNode,
+            text: "Value Share Traded",
+            obsecureText: false,
+            controller: valuesharetradedController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Value Share Traded",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: savingdepositrateFocusNode,
+            text: "Savings Deposit Rate",
+            obsecureText: false,
+            controller: savingdepositrateController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Savings Deposit Rate",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: turnoverFocusNode,
+            text: "Turn Over Ratio",
+            obsecureText: false,
+            controller: turnoverController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Turn Over Ratio",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: treasuryBillFocusNode,
+            text: "Treasury Bill Rate",
+            obsecureText: false,
+            controller: treasuryBillController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Treasury Bill Rate",
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          TextInput(
+            enabled: true,
+            focusNode: totallistingstockFocusNode,
+            text: "Total Stock Listing",
+            obsecureText: false,
+            controller: totallistingstockController,
+            textInputType: TextInputType.number,
+            widget: const Icon(
+              Icons.numbers,
+              color: mainColor,
+              size: Sizes.iconSize,
+            ),
+            onChanged: (value) {},
+            labelText: "Total Stock Listing",
           ),
         ]),
       ),
@@ -425,25 +696,38 @@ class _MarcoeconomicsState extends ConsumerState<Marcoeconomics> {
                 ),
               ),
             ),
-          if (_currentPage > 0)
-            const SizedBox(width: 8.0),
+          if (_currentPage > 0) const SizedBox(width: 8.0),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color:  mainColor,
+                color: mainColor,
               ),
               child: ElevatedButton(
                 onPressed: isLastPage ? _completeForm : _nextPage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:  mainColor,
+                  backgroundColor: mainColor,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
-                child: Text(
-                  isLastPage ? "Submit" : "Next",
-                  style: const TextStyle(color: Colors.white),
-                ),
+                child: uploading
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white)),
+                          const SizedBox(width: 20),
+                          Text(submitText,
+                              style: const TextStyle(color: Colors.white)),
+                        ],
+                      )
+                    : Text(
+                        isLastPage ? 'Submit' : "Next",
+                        style: const TextStyle(color: Colors.white),
+                      ),
               ),
             ),
           ),

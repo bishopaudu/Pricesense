@@ -3,13 +3,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pricesense/model/history_model.dart';
+import 'package:pricesense/model/agent_history_model.dart';
 import 'package:pricesense/providers/connectivity_provider.dart';
-import 'package:pricesense/providers/history_provider.dart';
 import 'package:pricesense/screens/details.dart';
 import 'package:pricesense/utils/capitalize.dart';
 import 'package:pricesense/utils/colors.dart';
-import 'package:pricesense/utils/history_notifier.dart';
+import 'package:pricesense/utils/agent_history_notifier.dart';
+import 'package:pricesense/utils/agent_history_service.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({Key? key}) : super(key: key);
@@ -39,9 +39,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     _filterSearchResults(searchController.text);
   }
 
- void _filterSearchResults(String query) {
-   // final historyAsyncValue = ref.read(historyProvider);
-       final historyState = ref.watch(historyNotifierProvider);
+  void _filterSearchResults(String query) {
+    //final historyAsyncValue = ref.read(historyProvider);
+    final historyState = ref.watch(historyNotifierProvider);
 
     historyState.when(
       data: (historyResponse) {
@@ -54,7 +54,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         }
 
         List<HistoryItem> filteredList = historyList.where((item) {
-          return item.foodItem.name.toLowerCase().contains(query.toLowerCase()) ||
+          return item.foodItem.name
+                  .toLowerCase()
+                  .contains(query.toLowerCase()) ||
               item.market.name.toLowerCase().contains(query.toLowerCase());
         }).toList();
 
@@ -69,11 +71,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-   // final historyAsyncValue = ref.watch(historyProvider);
-       final historyState = ref.watch(historyNotifierProvider);
+    // final historyAsyncValue = ref.watch(historyProvider);
+
+    final formatter = NumberFormat('#,##0');
+    final historyState = ref.watch(historyNotifierProvider);
 
     final internetStatus = ref.watch(connectivityProvider);
-    var format = NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
+    var format =
+        NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
 
     return Scaffold(
       appBar: AppBar(
@@ -83,7 +88,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ? "History"
               : "No Internet Access",
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: internetStatus == ConnectivityResult.mobile ||
@@ -144,25 +149,42 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 final historyList = filteredHistoryList.isEmpty
                     ? historyResponse.data.history
                     : filteredHistoryList;
-
+                final reversedHistoryList = historyList.reversed.toList();
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ref.refresh(historyProvider);
+                    ref.read(historyProvider);
                   },
                   child: ListView.builder(
-                    itemCount: historyList.length,
+                    // reverse: true,
+                    itemCount: reversedHistoryList.length,
                     itemBuilder: (context, index) {
-                      final item = historyList[index];
+                      final item = reversedHistoryList[index];
 
                       return ListTile(
-                        title: Text('${Capitalize.capitalizeFirstLetter(item.foodItem.name)} - ${item.brand}'),
+                        leading: CircleAvatar(
+                          backgroundColor: mainColor,
+                          child: Text(
+                            item.foodItem.name.substring(0, 1).toUpperCase(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        title: Text(
+                          item.brand != "No Brands Available"
+                              ? '${Capitalize.capitalizeFirstLetter(item.foodItem.name)} - ${item.brand}'
+                              : Capitalize.capitalizeFirstLetter(
+                                  item.foodItem.name),
+                        ),
+                        /*  title: Text(
+                            '${Capitalize.capitalizeFirstLetter(item.foodItem.name)} - ${item.brand}'),*/
                         subtitle: Text(item.measurement),
-                        trailing: Text('${format.currencySymbol}${item.price}'),
+                        trailing: Text(
+                            '${format.currencySymbol}${formatter.format(item.price)}'),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DetailsScreen(historyItem: item),
+                              builder: (context) =>
+                                  DetailsScreen(historyItem: item),
                             ),
                           );
                         },
@@ -171,17 +193,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: mainColor)),
+              loading: () => const Center(
+                  child: CircularProgressIndicator(color: mainColor)),
               error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Failed to load history'),
+                    const Text('Unable to load history'),
                     TextButton(
                       onPressed: () {
-                        ref.refresh(historyProvider);
+                        ref.read(historyProvider);
                       },
-                      child: Text("Refresh", style: TextStyle(color: mainColor)),
+                      child:
+                          const Text("Refresh", style: TextStyle(color: mainColor)),
                     ),
                   ],
                 ),
@@ -193,4 +217,3 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 }
-

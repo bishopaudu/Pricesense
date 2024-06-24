@@ -12,7 +12,7 @@ class UnauthorizedScreen extends ConsumerWidget {
     final internetStatus = ref.watch(connectivityProvider);
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Set the color of the back button
         ),
         title: Text(
@@ -21,7 +21,7 @@ class UnauthorizedScreen extends ConsumerWidget {
               ? "Unauthorized"
               : "No Internet Access",
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: internetStatus == ConnectivityResult.mobile ||
@@ -30,10 +30,16 @@ class UnauthorizedScreen extends ConsumerWidget {
             : Colors.red.shade400,
         centerTitle: true,
       ),
-      body: Center(
-        child: Text(
-          'Access Denied To This Resource.',
-          style: TextStyle(fontSize: 18, color: Colors.red),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning,size:70,color:Colors.red),
+            Text(
+              'You dont access to view this resource.',
+              style: TextStyle(fontSize: 18, color: Colors.red),
+            ),
+          ],
         ),
       ),
     );

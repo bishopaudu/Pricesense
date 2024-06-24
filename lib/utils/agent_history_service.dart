@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pricesense/model/history_model.dart';
+import 'package:pricesense/model/agent_history_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class HistoryService {
+  
   Future<HistoryResponse> fetchHistory(String token) async {
     final response = await http.get(
-      Uri.parse('https://priceintel.vercel.app/data/history'),
+      Uri.parse('https://priceintel.vercel.app/data/market/history'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

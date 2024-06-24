@@ -35,6 +35,8 @@ class HistoryItem {
   final String distributionType;
   final String brand;
   final String measurement;
+  final int taxes;
+  final int rent;
   final DateTime date;
   final int v;
 
@@ -47,6 +49,8 @@ class HistoryItem {
     required this.distributionType,
     required this.brand,
     required this.measurement,
+    required this.taxes,
+    required this.rent,
     required this.date,
     required this.v,
   });
@@ -61,6 +65,8 @@ class HistoryItem {
       distributionType: json['distribution_type'],
       brand: json['brand'],
       measurement: json['measurement'],
+      taxes:json['taxes'],
+      rent:json['rent'],
       date: DateTime.parse(json['date']),
       v: json['__v'],
     );

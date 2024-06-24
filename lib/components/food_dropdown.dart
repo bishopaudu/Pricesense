@@ -166,7 +166,7 @@ class _FoodDropdownState extends ConsumerState<FoodDropdown> {
           isExpanded: true,
           value: selectedFoodItem,
             iconSize: Sizes.iconSize,
-                icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
           items: foodItems.map((FoodItem foodItem) {
             return DropdownMenuItem<String>(
               value: foodItem.name,
@@ -223,7 +223,7 @@ class _FoodDropdownState extends ConsumerState<FoodDropdown> {
           isExpanded: true,
           value: selectedBrand,
             iconSize: Sizes.iconSize,
-                icon:Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon:const Icon(Icons.arrow_drop_down, color: Colors.black),
           items: brands.isEmpty
               ? empty.map((String brand) {
                   return DropdownMenuItem<String>(
@@ -283,7 +283,7 @@ class _FoodDropdownState extends ConsumerState<FoodDropdown> {
           isExpanded: true,
           value: selectedMeasurement,
             iconSize: Sizes.iconSize,
-                icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
           items: measurements.map((String measurement) {
             return DropdownMenuItem<String>(
               value: measurement,

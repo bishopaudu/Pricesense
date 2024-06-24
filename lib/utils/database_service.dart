@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:path/path.dart';
+import 'package:pricesense/model/cities.dart';
 import 'package:pricesense/model/food_item_dbmodel.dart';
+import 'package:pricesense/model/macroeconomics_model.dart';
 import 'package:pricesense/model/markets.dart';
+import 'package:pricesense/model/online_store_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:pricesense/model/food_item_model.dart';
+import 'package:pricesense/model/enery_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -31,27 +35,116 @@ class DatabaseHelper {
     await db.execute(
       'CREATE TABLE foodItems(id TEXT PRIMARY KEY, name TEXT, brand TEXT, measurement TEXT)',
     );
-   await db.execute(
-    'CREATE TABLE surveys('
-    'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-    'marketid TEXT, '
-    'foodId TEXT, '
-    'distributionType TEXT, '
-    'brand TEXT, '
-    'measurement TEXT, '
-    'userId TEXT, '
-    'price INTEGER, '
-    'foodname TEXT, '
-    'shoprent INTEGER, '
-    'taxandLevies INTEGER, ' 
-    'location TEXT' 
-    ')',
-  );
-  await db.execute(
+    await db.execute(
+      'CREATE TABLE surveys('
+      'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'marketid TEXT, '
+      'foodId TEXT, '
+      'distributionType TEXT, '
+      'brand TEXT, '
+      'measurement TEXT, '
+      'userId TEXT, '
+      'price INTEGER, '
+      'foodname TEXT, '
+      'shoprent INTEGER, '
+      'taxandLevies INTEGER, '
+      'location TEXT'
+      ')',
+    );
+    await db.execute(
       'CREATE TABLE cities(id TEXT PRIMARY KEY, name TEXT)',
     );
     await db.execute(
       'CREATE TABLE markets(id TEXT PRIMARY KEY, name TEXT, cityId TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE city(id TEXT PRIMARY KEY, name TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE macroeconomics('
+      'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'officialUsdExchangeRate INTEGER, '
+      'monetaryPolicyRate INTEGER, '
+      'minimumDiscountRate INTEGER, '
+      'interbankCallRate INTEGER, '
+      'treasuryBillRate INTEGER, '
+      'savingsDepositRate INTEGER, '
+      'primeLendingRate INTEGER, '
+      'marketCapitalization INTEGER, '
+      'allShareIndex INTEGER, '
+      'turnOverRatio INTEGER, '
+      'valueShareTraded INTEGER, '
+      'totalListingStocks INTEGER'
+      ')',
+    );
+    await db.execute(
+      'CREATE TABLE onlinestore ('
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+      'store TEXT,'
+      'foodItem TEXT,'
+      'price INTEGER,'
+      'brand TEXT,'
+      'measurement TEXT'
+      ')',
+    );
+    await db.execute(
+      'CREATE TABLE energy ('
+      'city TEXT PRIMARY KEY,'
+      'unofficialusdexchangerate INTEGER,'
+      'pricepetrolindependent INTEGER,'
+      'pricepetrolnnpc INTEGER,'
+      'pricedieselindependent INTEGER,'
+      'pricedieselnnpc INTEGER'
+      ')',
+    );
+  }
+
+  Future<void> insertEnergy(EnergyModel energy) async {
+    final db = await database;
+    await db.insert(
+      'energy',
+      energy.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<EnergyModel>> getEnergy() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('energy');
+    return List.generate(maps.length, (i) {
+      return EnergyModel.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> deleteEnergy(String city) async {
+    final db = await database;
+    await db.delete(
+      'energy',
+      where: 'city = ?',
+      whereArgs: [city],
+    );
+  }
+
+  Future<void> insertOnlinestore(OnlineStoreModel onlineStore) async {
+    final db = await database;
+    await db.insert('onlinestore', onlineStore.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<OnlineStoreModel>> getOnlinestore() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('onlinestore');
+    return List.generate(maps.length, (i) {
+      return OnlineStoreModel.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> deleteOnlinestore(int id) async {
+    final db = await database;
+    await db.delete(
+      'onlinestore',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 
@@ -93,7 +186,7 @@ class DatabaseHelper {
     final List<Map<String, dynamic>> maps = await db.query('surveys');
     return List.generate(maps.length, (i) {
       return FoodItemDbModel(
-       id: maps[i]['id'],
+        id: maps[i]['id'],
         marketid: maps[i]['marketid'],
         foodId: maps[i]['foodId'],
         distributionType: maps[i]['distributionType'],
@@ -111,11 +204,19 @@ class DatabaseHelper {
 
   Future<int> getSurveyCount() async {
     final db = await database;
-    final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM surveys'));
+    final count = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM surveys'));
     return count ?? 0;
   }
 
-  Future<void> deleteSurvey( int? id) async {
+  Future<int> getCoordinatorCount() async {
+    final db = await database;
+    final count =
+        Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM energy'));
+    return count ?? 0;
+  }
+
+  Future<void> deleteSurvey(int? id) async {
     final db = await database;
     await db.delete(
       'surveys',
@@ -123,7 +224,8 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-   Future<void> insertCity(City city) async {
+
+  Future<void> insertCity(City city) async {
     final db = await database;
     await db.insert(
       'cities',
@@ -145,7 +247,8 @@ class DatabaseHelper {
         where: 'cityId = ?',
         whereArgs: [cityMap['id']],
       );
-      List<Market> markets = marketMaps.map((marketMap) => Market.fromMap(marketMap)).toList();
+      List<Market> markets =
+          marketMaps.map((marketMap) => Market.fromMap(marketMap)).toList();
       cities.add(City(
         id: cityMap['id'],
         name: cityMap['name'],
@@ -168,6 +271,75 @@ class DatabaseHelper {
     final db = await database;
     await db.delete('cities');
     await db.delete('markets');
+    await db.delete('city');
+  }
+
+  Future<void> insertCityData(cityData city) async {
+    final db = await database;
+    await db.insert(
+      'city',
+      {'id': city.id, 'name': city.name},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<cityData>> getCity() async {
+    final db = await database;
+    final List<Map<String, dynamic>> cityMap = await db.query('city');
+    return List.generate(cityMap.length, (i) {
+      return cityData(
+        id: cityMap[i]['_id'],
+        name: cityMap[i]['name'],
+      );
+    });
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        'CREATE TABLE macroeconomics('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+        'officialUsdExchangeRate INTEGER, '
+        'monetaryPolicyRate INTEGER, '
+        'minimumDiscountRate INTEGER, '
+        'interbankCallRate INTEGER, '
+        'treasuryBillRate INTEGER, '
+        'savingsDepositRate INTEGER, '
+        'primeLendingRate INTEGER, '
+        'marketCapitalization INTEGER, '
+        'allShareIndex INTEGER, '
+        'turnOverRatio INTEGER, '
+        'valueShareTraded INTEGER, '
+        'totalListingStocks INTEGER'
+        ')',
+      );
+    }
+  }
+
+  // Macroeconomics CRUD operations
+  Future<void> insertMacroeconomics(MacroeconomicsModel model) async {
+    final db = await database;
+    await db.insert(
+      'macroeconomics',
+      model.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<MacroeconomicsModel>> getMacroeconomics() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('macroeconomics');
+    return List.generate(maps.length, (i) {
+      return MacroeconomicsModel.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> deleteMacroeconomics(int id) async {
+    final db = await database;
+    await db.delete(
+      'macroeconomics',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
-

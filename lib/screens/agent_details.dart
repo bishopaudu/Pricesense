@@ -5,36 +5,36 @@ import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/feedbackscreen.dart';
 import 'package:pricesense/screens/login.dart';
+import 'package:pricesense/utils/auth_service.dart';
 import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 import 'package:pricesense/screens/profilescreen.dart';
 
 class AgentDetails extends ConsumerStatefulWidget {
-  const AgentDetails({super.key});
+  const AgentDetails({super.key, this.onLogout});
+  final void Function(BuildContext)? onLogout;
 
   @override
   ConsumerState<AgentDetails> createState() => _AgentDetailsState();
 }
 
 class _AgentDetailsState extends ConsumerState<AgentDetails> {
-  // bool value = true;
-
   @override
   Widget build(BuildContext context) {
     final agentName = ref.watch(userProvider);
     final internetStatus = ref.watch(connectivityProvider);
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Set the color of the back button
         ),
         title: Text(
           internetStatus == ConnectivityResult.mobile ||
                   internetStatus == ConnectivityResult.wifi
               ? "Agent Details"
-              : "No Internet Acess",
+              : "No Internet Access",
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: internetStatus == ConnectivityResult.mobile ||
@@ -95,49 +95,17 @@ class _AgentDetailsState extends ConsumerState<AgentDetails> {
                     ),
                   ],
                 ),
-                child: Column(children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => const ProfileScreen())),
-                      );
-                    },
-                    child: _buildInfoRow(
-                      Icons.person_2,
-                      "Profile",
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  GestureDetector(
-                    onTap: () {},
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: ((context) => FeedbackScreen())),
-                        );
-                      },
-                      child: _buildInfoRow(
-                        Icons.contact_support,
-                        "Send FeedBack",
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Login()));
-                    },
-                    child: _buildInfoRow(
-                      Icons.logout,
-                      "Logout",
-                    ),
-                  ),
-                ]),
+                child: Column(
+                  children: [
+                    _buildInfoRow(
+                        Icons.person_2, "Profile", const ProfileScreen()),
+                    const Divider(height: 15),
+                    _buildInfoRow(Icons.contact_support, "Send Feedback",
+                        FeedbackScreen()),
+                    const Divider(height: 15),
+                    _buildLogoutRow(Icons.logout, "Logout"),
+                  ],
+                ),
               ),
             ],
           ),
@@ -146,26 +114,52 @@ class _AgentDetailsState extends ConsumerState<AgentDetails> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, [String? trailingText]) {
-    return Row(
-      children: [
-        Icon(icon, size: Sizes.iconSize, color: mainColor),
-        const SizedBox(width: 10),
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-        ),
-        if (trailingText != null) ...[
-          const Spacer(),
-          Text(
-            trailingText,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color.fromRGBO(76, 194, 201, 1),
+  Widget _buildInfoRow(IconData icon, String label, Widget screen) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => screen));
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Icon(icon, size: Sizes.iconSize, color: mainColor),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
             ),
-          ),
-        ],
-      ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutRow(IconData icon, String label) {
+    final auth = AuthService();
+    return InkWell(
+      onTap: () {
+        auth.clearUserData();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Login()),
+          (Route<dynamic> route) => false,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Icon(icon, size: Sizes.iconSize, color: mainColor),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

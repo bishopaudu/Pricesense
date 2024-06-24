@@ -15,10 +15,10 @@ import 'package:pricesense/utils/colors.dart';
 class CategorySelectionScreen extends ConsumerWidget {
   CategorySelectionScreen({super.key});
   List<String> categoryTypes = [
-    'Market',
-    'Online Stores',
-    'Macroeconomic Indicators',
-    'Energy Survey'
+    'Physical Market Collection',
+    'Online Market Price Collection',
+    'Macroeconomic Variables',
+    'Energy Price Survey'
   ];
 
  
@@ -29,29 +29,29 @@ class CategorySelectionScreen extends ConsumerWidget {
     final user = ref.watch(userProvider);
     Widget screen;
     switch (category) {
-      case 'Market':
+      case 'Physical Market Collection':
       if (user?.role == 'agent') {
           screen = const CollectionScreen();
         } else {
           screen = const UnauthorizedScreen();
         }
         break;
-      case 'Online Stores':
+      case 'Online Market Price Collection':
         if (user?.role == 'analyst') {
           screen = const OnlineStores();
         } else {
           screen = const UnauthorizedScreen();
         }
         break;
-      case 'Macroeconomic Indicators':
+      case 'Macroeconomic Variables':
         if (user?.role == 'analyst') {
           screen = const Marcoeconomics();
         } else {
           screen = const UnauthorizedScreen();
         }
         break;
-        case 'Energy Survey':
-        if (user?.role == 'agent') {
+        case 'Energy Price Survey':
+        if (user?.role == 'coordinator') {
           screen = const EnergySurveyScreen();
         } else {
           screen = const UnauthorizedScreen();
@@ -69,6 +69,9 @@ class CategorySelectionScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+         iconTheme: const IconThemeData(
+          color: Colors.white, 
+        ),
         backgroundColor: internetStatus == ConnectivityResult.mobile ||
                 internetStatus == ConnectivityResult.wifi
             ? mainColor

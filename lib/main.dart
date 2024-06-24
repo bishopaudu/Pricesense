@@ -7,6 +7,7 @@ import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/first_screen.dart';
 import 'package:pricesense/screens/splash_screen.dart';
 import 'package:pricesense/utils/auth_service.dart';
+import 'package:pricesense/utils/colors.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -17,11 +18,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
      // theme: ThemeData(primarySwatch: Colors.blue),
-      title: 'Pricesense',
-      home: const InitialScreen(),
+      title: 'PriceIntel',
+      home: InitialScreen(),
     );
   }
 }
@@ -79,7 +80,7 @@ class _InitialScreenState extends ConsumerState<InitialScreen> {
     return Scaffold(
       body: Center(
         child: _isLoading
-            ? const CircularProgressIndicator(color: Color.fromRGBO(76, 194, 201, 1))
+            ? const CircularProgressIndicator(color:mainColor)
             : const Placeholder(),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/reset_password.dart';
+import 'package:pricesense/utils/capitalize.dart';
 import 'package:pricesense/utils/colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -47,6 +48,7 @@ class ProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(15.0),
         child: Column(
           // crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Center(
               child: Column(
@@ -69,13 +71,28 @@ class ProfileScreen extends ConsumerWidget {
                     //crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      _buildProfileItem('Coordinator', user.coordinator),
+                      if (user.coordinator != '') ...[
+                      _buildProfileItem('Coordinator',
+                          '${Capitalize.capitalizeFirstLetter(user.coordinator)}')
+                    ],
+                      //_buildProfileItem('Coordinator', user.coordinator),
                       _buildProfileItem('User ID', user.username),
                       _buildProfileItem('User Email', user.email),
-                      _buildProfileItem('City', user.city),
-                      _buildProfileItem('Phone', user.phone),
-                      _buildProfileItem('Gender', user.gender),
-                      _buildProfileItem('Role', user.role),
+                        if (user.city != '') ...[
+                      _buildProfileItem('City',
+                          '${Capitalize.capitalizeFirstLetter(user.city)}')
+                    ],
+                      //_buildProfileItem('City', user.city),
+                      if (user.phone != '') ...[
+                      _buildProfileItem('Phone', user.phone)
+                    ],
+                      //_buildProfileItem('Phone', user.phone),
+                      if (user.gender != '') ...[
+                      _buildProfileItem('Gender',
+                          '${Capitalize.capitalizeFirstLetter(user.gender)}')
+                    ],
+                     // _buildProfileItem('Gender', user.gender),
+                      _buildProfileItem('Role', '${Capitalize.capitalizeFirstLetter(user.role)}'),
                     ],
                   ),
                 ],

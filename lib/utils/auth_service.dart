@@ -36,7 +36,7 @@ class AuthService {
     await prefs.setString(userPhoneKey, phone);
     await prefs.setString(userCityKey, city);
     await prefs.setString(userIdKey, id);
-        await prefs.setString(userGenderKey,gender);
+    await prefs.setString(userGenderKey, gender);
     await prefs.setString(userCoordinatorKey, coordinator);
     await prefs.setString(userRoleKey, role);
     await prefs.setString(userNameKey, username);
@@ -55,7 +55,7 @@ class AuthService {
       'id': prefs.getString(userIdKey),
       'coordinator': prefs.getString(userCoordinatorKey),
       'role': prefs.getString(userRoleKey),
-       'username': prefs.getString(userNameKey)
+      'username': prefs.getString(userNameKey)
     };
   }
 
@@ -67,12 +67,13 @@ class AuthService {
     await prefs.remove(userLastNameKey);
     await prefs.remove(userEmailKey);
     await prefs.remove(userCityKey);
-    await prefs.remove(userGenderKey); 
+    await prefs.remove(userGenderKey);
     await prefs.remove(userPhoneKey);
     await prefs.remove(userCoordinatorKey);
     await prefs.remove(userIdKey);
     await prefs.remove(userRoleKey);
-    await prefs.remove(userNameKey);  
+    await prefs.remove(userNameKey);
+    print("cleared user data cached");
   }
 
   Future<bool> isTokenValid() async {

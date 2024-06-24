@@ -13,10 +13,11 @@ import 'package:pricesense/providers/connectivity_provider.dart';
 import 'package:pricesense/providers/survey_count_provider.dart';
 import 'package:pricesense/providers/userproviders.dart';
 import 'package:pricesense/screens/collection_complete.dart';
-import 'package:pricesense/utils/capitalize.dart';
+import 'package:pricesense/utils/agent_history_notifier.dart';
 import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/data.dart';
 import 'package:pricesense/utils/database_service.dart';
+import 'package:pricesense/utils/grid_data_service.dart';
 import 'package:pricesense/utils/sizes.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -176,7 +177,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           connectivityResult == ConnectivityResult.wifi) {
         // Make the POST request
         final response = await http.post(
-          Uri.parse('https://priceintel.vercel.app/data/new'),
+          Uri.parse('https://priceintel.vercel.app/data/market/new'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ${user.token}',
@@ -189,7 +190,9 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             isCompleted = true;
             uploading = false;
           });
-           showSnackBar('Successfully Uploaded To Server');
+          ref.read(historyNotifierProvider.notifier).fetchHistory();
+           ref.invalidate(gridDataProvider);
+           showSnackBar('Successfully uploaded to server');
           print(response.body);
         } else {
           showSnackBar('Error uploading');
@@ -198,6 +201,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           print(response.statusCode);
         }
       } else {
+        // data saved to the local database(sqlite)
         final localSurvey = FoodItemDbModel(
           marketid: marketValue ?? "",
           foodId: selectedFoodData['foodid']!,
@@ -211,15 +215,14 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           shoprent: int.parse(shoprentController.text),
           taxandLevies: int.parse(taxandLeviesController.text)
         );
-        await db.insertSurvey(localSurvey);
+        await db.insertSurvey(localSurvey); //saving to the database
         ref.read(surveyCountProvider.notifier).refreshSurveyCount();
         setState(() {
           uploading = false;
           isCompleted = true;
         });
-
         //showErrorDialog('Not Connected To Server.Saved Locally');
-        showSnackBar("Not Connected To Server.Saved Locally");
+        showSnackBar("Not connected to server.Saved locally");
       }
     } catch (e) {
       print(e);
@@ -263,8 +266,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         title: Text(
           internetStatus == ConnectivityResult.mobile ||
                   internetStatus == ConnectivityResult.wifi
-              ? "Collection"
-              : "No Internet Acess",style:const TextStyle(color: Colors.white)),
+              ? 'Physical Market Collection'
+              : "No Internet Access",style:const TextStyle(color: Colors.white)),
               centerTitle: true,
               ),
       
@@ -569,6 +572,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   }
 
   Widget _buildSummaryPage() {
+        //final formatter = NumberFormat('#,##0');
+   var format =NumberFormat.simpleCurrency(locale: Platform.localeName, name: "NGN");
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -593,7 +598,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             _buildSummaryItem("Type:", selectedFoodData['brand'] ?? ""),
             _buildSummaryItem(
                 "Measurement:", selectedFoodData['measurement'] ?? ""),
-            _buildSummaryItem("Price:", priceController.text),
+            _buildSummaryItem("Price:", '${format.currencySymbol}${priceController.text}'),
             _buildSummaryItem("Shop Rent:", shoprentController.text),
             _buildSummaryItem("Tax/Levies", taxandLeviesController.text),
             _buildSummaryItem("Date Submitted:",

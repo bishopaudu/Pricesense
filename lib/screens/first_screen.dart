@@ -1,92 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pricesense/screens/agent_details.dart';
 import 'package:pricesense/screens/category_selection.dart';
-import 'package:pricesense/screens/history_screen.dart';
+import 'package:pricesense/screens/recents_screen.dart';
 import 'package:pricesense/screens/home_screen.dart';
+import 'package:pricesense/utils/bottombar_notifier.dart';
 import 'package:pricesense/utils/colors.dart';
 import 'package:pricesense/utils/sizes.dart';
 
-class FirstScreen extends StatefulWidget {
+class FirstScreen extends ConsumerStatefulWidget {
   const FirstScreen({super.key});
 
   @override
-  State<FirstScreen> createState() => _FirstScreenState();
+  ConsumerState<FirstScreen> createState() => _FirstScreenState();
 }
 
-class _FirstScreenState extends State<FirstScreen> {
-  int _selectedIndex = 0;
-
-  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
-
-  static final List<Widget> _pages = <Widget>[
-    const HomeScreen(),
-    CategorySelectionScreen(),
-    const HistoryScreen(),
-    const AgentDetails(),
-  ];
-
-  void _onItemTapped(int index) {
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-    } else {
-      // Popping to first route in case user taps the icon of the current tab
-      _navigatorKeys[index].currentState!.popUntil((route) => route.isFirst);
-    }
-  }
-
-  Future<bool> _onWillPop() async {
-    final isFirstRouteInCurrentTab =
-        !await _navigatorKeys[_selectedIndex].currentState!.maybePop();
-    if (isFirstRouteInCurrentTab) {
-      if (_selectedIndex != 0) {
-        setState(() {
-          _selectedIndex = 0;
-        });
-        return false;
-      }
-    }
-    return isFirstRouteInCurrentTab;
-  }
-
+class _FirstScreenState extends ConsumerState<FirstScreen> {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages.asMap().map((index, page) {
-            return MapEntry(
-              index,
-              Navigator(
-                key: _navigatorKeys[index],
-                onGenerateRoute: (routeSettings) {
-                  return MaterialPageRoute(
-                    builder: (context) => page,
-                    settings: routeSettings,
-                  );
-                },
-              ),
-            );
-          }).values.toList(),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
+  final _selectedIndex = ref.watch(bottomNavProvider);
+  
+    void onItemTapped(int index) {
+      ref.read(bottomNavProvider.notifier).setIndex(index);
+    }
+
+ //   int _currentIndex = 0;
+  final List<Widget> _screens = [
+     const HomeScreen(),
+      CategorySelectionScreen(),
+      const HistoryScreen(),
+     const AgentDetails(
+      ),
+  ];
+
+    return Scaffold(
+      body:IndexedStack(
+        index: _selectedIndex,
+        children:_screens
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,
-          currentIndex: _selectedIndex,
           selectedItemColor: primaryColor,
           unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
-          items: const <BottomNavigationBarItem>[
+        currentIndex: _selectedIndex,
+        onTap:onItemTapped,
+        items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: FaIcon(Icons.home, size: Sizes.iconSize),
               label: 'Home',
@@ -104,11 +65,11 @@ class _FirstScreenState extends State<FirstScreen> {
               label: 'Agent',
             ),
           ],
-        ),
       ),
     );
   }
 }
+
 
 
 

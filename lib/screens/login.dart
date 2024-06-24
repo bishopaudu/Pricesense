@@ -112,25 +112,26 @@ class _LoginState extends ConsumerState<Login> {
         if (responseData.containsKey('token')) {
           final user = UserData.fromJson(responseData);
           ref.read(userProvider.notifier).setUser(user);
-          final authService = AuthService();
+         final authService = AuthService();
           await authService.saveUserData(
-          responseData["token"],
-          responseData["firstname"],
-          responseData["lastname"],
-          responseData["email"],
-          responseData["phone"],
-          responseData["city"],
-          responseData["_id"],
-          responseData["coordinator"],
-          responseData["gender"],
-          responseData["username"],
-          responseData["role"]
-
+          responseData["token"] ?? "",
+          responseData["firstname"] ?? " ",
+          responseData["lastname"] ?? "",
+          responseData["email"] ?? "",
+          responseData["phone"] ?? "",
+          responseData["city"] ?? "",
+          responseData["_id"] ?? "",
+          responseData["coordinator"] ?? "",
+          responseData["gender"] ?? "",
+          responseData["username"] ?? "",
+          responseData["role"] ?? ""
+         // responseData["title"] ?? ""
             );
           usernameController.clear();
           passwordController.clear();
           navigate();
         } else {
+          print(response.body);
           showErrorDialog(response.body);
         }
       } else {
@@ -138,7 +139,8 @@ class _LoginState extends ConsumerState<Login> {
       }
     } catch (response) {
       print('Error: $response');
-      showErrorDialog('An error occurred. ${response}');
+     //showErrorDialog('An error occurred. ${response}');
+     showErrorDialog('Something went wrong');
     } finally {
       setState(() {
         isLoading = false;

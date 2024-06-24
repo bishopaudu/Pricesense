@@ -1,19 +1,20 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pricesense/screens/category_selection.dart';
-import 'package:pricesense/screens/home_screen.dart';
+import 'package:pricesense/utils/bottombar_notifier.dart';
 import 'package:pricesense/utils/colors.dart';
 
-class CollectionComplete extends StatefulWidget {
+class CollectionComplete extends ConsumerStatefulWidget {
   const CollectionComplete({super.key});
 
   @override
   _CollectionCompleteState createState() => _CollectionCompleteState();
 }
 
-class _CollectionCompleteState extends State<CollectionComplete>
+class _CollectionCompleteState extends ConsumerState<CollectionComplete>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _opacityController;
@@ -53,11 +54,9 @@ class _CollectionCompleteState extends State<CollectionComplete>
     );
   }
 
-  void goHome(){
-     Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
+  void goHome() {
+    ref.read(bottomNavProvider.notifier).setIndex(0);
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   @override

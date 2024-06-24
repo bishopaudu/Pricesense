@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pricesense/model/history_model.dart';
+import 'package:pricesense/model/agent_history_model.dart';
 import 'package:pricesense/providers/userproviders.dart';
-import 'package:pricesense/utils/history_service.dart';
+import 'package:pricesense/utils/agent_history_service.dart';
 
 class HistoryNotifier extends StateNotifier<AsyncValue<HistoryResponse>> {
   HistoryNotifier(this.ref) : super(const AsyncValue.loading()) {
